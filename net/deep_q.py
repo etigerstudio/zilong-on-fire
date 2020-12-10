@@ -3,9 +3,9 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 
 
-class DeepQ(Model):
+class DeepQNet(Model):
     def __init__(self):
-        super(DeepQ, self).__init__()
+        super(DeepQNet, self).__init__()
         self.d1 = Dense(8, activation='relu')
         self.d2 = Dense(24, activation='relu')
         self.d3 = Dense(8)
