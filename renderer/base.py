@@ -1,9 +1,11 @@
 # Base renderer class declaration
 
-
 class BaseRenderer:
-    def setup(self, init_state):
-        pass
+    def setup(self, info=None):
+        raise NotImplementedError
 
-    def update(self, new_state):
-        pass
+    def update(self, state, info=None):
+        raise NotImplementedError
+
+    def close(self, info=None):
+        raise NotImplementedError
