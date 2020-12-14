@@ -59,11 +59,11 @@ class BasicFixedEnvironment(BaseEnvironment):
             self.current_arrow_distance -= 1
 
     def __reset_actor(self):
-        self.actor_facing = random.randint(0, self.partitions) if \
+        self.actor_facing = random.randint(0, self.partitions - 1) if \
             self.random_reset else 0
 
     def __reset_arrow(self):
-        self.arrow_direction = random.randint(0, self.partitions) if \
+        self.arrow_direction = random.randint(0, self.partitions - 1) if \
             self.random_reset else self.partitions // 2
         self.current_arrow_distance = self.max_arrow_distance
 
