@@ -230,3 +230,49 @@ array([[[8.00596722, 8.83433206, 9.08996271],
         [9.23972554, 8.49911631, 7.9425287 ],
         [8.77144629, 8.69505961, 9.10490225]]])
 ```
+
+# Demo
+
+```bash
+GAME START 6000
+Zilong:3 Arrow:1
+Zilong:2 Arrow:1 Action.LEFT
+Zilong:1 Arrow:1 Action.LEFT
+Last arrow is dodged!
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Last arrow is dodged!
+Zilong:1 Arrow:3 Action.NONE
+Zilong:0 Arrow:3 Action.LEFT
+Zilong:3 Arrow:3 Action.LEFT
+Last arrow is dodged!
+Zilong:3 Arrow:1 Action.NONE
+Zilong:2 Arrow:1 Action.LEFT
+Zilong:1 Arrow:1 Action.LEFT
+Last arrow is dodged!
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Last arrow is dodged!
+Zilong:1 Arrow:2 Action.NONE
+Zilong:2 Arrow:2 Action.RIGHT
+Zilong:2 Arrow:2 Action.NONE
+Last arrow is dodged!
+Zilong:2 Arrow:2 Action.NONE
+Zilong:2 Arrow:2 Action.NONE
+Zilong:2 Arrow:2 Action.NONE
+Last arrow is dodged!
+Zilong:2 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.LEFT
+Zilong:1 Arrow:1 Action.NONE
+Last arrow is dodged!
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Zilong:1 Arrow:1 Action.NONE
+Last arrow is dodged!
+Zilong:1 Arrow:0 Action.NONE
+Zilong:2 Arrow:0 Action.RIGHT
+Zilong:3 Arrow:0 Action.RIGHT
+GAME OVER 28
+```

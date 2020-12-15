@@ -6,18 +6,21 @@ from env.base import BaseEnvironment
 from enum import Enum
 
 
-class BasicFixedEnvironment(BaseEnvironment):
+class SlashFixedEnvironment(BaseEnvironment):
     """Basic environment implementation with fixed main character"""
 
     ALIVE_REWARD = 1.0
     DEAD_REWARD = -1.0
     PARTITIONS = 4
-    ARROW_DISTANCE = 2
+    ARROW_DISTANCE = 4
+    SLASH_RANGE = 1
+    SLASHED_ARROW_DISTANCE = -1
 
     class Action(Enum):
-        LEFT = 0
-        RIGHT = 1
-        NONE = 2
+        TURN_LEFT = 0
+        TURN_RIGHT = 1
+        SLASH = 2
+        NONE = 3
 
     def __init__(self, partitions=PARTITIONS, arrow_distance=ARROW_DISTANCE, random_reset=False):
         self.partitions = partitions
@@ -43,18 +46,20 @@ class BasicFixedEnvironment(BaseEnvironment):
         return self.DEAD_REWARD if dead else self.ALIVE_REWARD
 
     def __actor_step(self, action):
-        if action == self.Action.LEFT:
+        if action == self.Action.TURN_LEFT:
             self.actor_facing = (self.actor_facing - 1) % self.partitions
-        elif action == self.Action.RIGHT:
+        elif action == self.Action.TURN_RIGHT:
             self.actor_facing = (self.actor_facing + 1) % self.partitions
+        elif action == self.Action.SLASH:
+            self.__slash_arrow()
         elif action == self.Action.NONE:
             pass
         else:
             assert False, 'Unexpected action given!'
 
     def __arrow_step(self):
-        if self.current_arrow_distance == 0:
-            # print('v Last arrow is dodged!')
+        if self.current_arrow_distance == 0 or \
+                self.current_arrow_distance == self.SLASHED_ARROW_DISTANCE:
             self.__reset_arrow()
         else:
             self.current_arrow_distance -= 1
@@ -69,5 +74,10 @@ class BasicFixedEnvironment(BaseEnvironment):
         self.current_arrow_distance = self.max_arrow_distance
 
     def __is_dead(self):
-        return self.current_arrow_distance == 0 and \
-               self.actor_facing != self.arrow_direction
+        return self.current_arrow_distance == 0
+
+    def __slash_arrow(self):
+        if self.current_arrow_distance <= self.SLASH_RANGE and \
+                self.actor_facing == self.arrow_direction:
+            self.current_arrow_distance = self.SLASHED_ARROW_DISTANCE
+            # print('v Slashed an arrow!')
