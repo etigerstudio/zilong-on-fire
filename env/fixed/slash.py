@@ -22,6 +22,14 @@ class SlashFixedEnvironment(BaseEnvironment):
         SLASH = 2
         NONE = 3
 
+    STATE_SHAPE = (PARTITIONS,) * 2
+    ACTIONS = [
+        Action.TURN_LEFT,
+        Action.TURN_RIGHT,
+        Action.SLASH,
+        Action.NONE
+    ]
+
     def __init__(self, partitions=PARTITIONS, arrow_distance=ARROW_DISTANCE, random_reset=False):
         self.partitions = partitions
         self.max_arrow_distance = arrow_distance

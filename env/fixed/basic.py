@@ -19,6 +19,13 @@ class BasicFixedEnvironment(BaseEnvironment):
         RIGHT = 1
         NONE = 2
 
+    STATE_SHAPE = (PARTITIONS,) * 2
+    ACTIONS = [
+        Action.LEFT,
+        Action.RIGHT,
+        Action.NONE
+    ]
+
     def __init__(self, partitions=PARTITIONS, arrow_distance=ARROW_DISTANCE, random_reset=False):
         self.partitions = partitions
         self.max_arrow_distance = arrow_distance
