@@ -2,7 +2,8 @@
 import numpy as np
 import random
 
-from net.q_table import QTable
+# from net.q_table import QTable
+from net.deep_q import DeepQNet
 from renderer.fixed.text import TextFixedRenderer
 
 
@@ -12,7 +13,8 @@ class FixedGame:
         random.seed(1)
 
         self.env = environment(random_reset=True)
-        self.q_table = QTable(environment.STATE_SHAPE, environment.ACTIONS)
+        # self.q_table = QTable(environment.STATE_SHAPE, environment.ACTIONS)
+        self.deep_q = DeepQNet(2, environment.ACTIONS)  # state_shape = 2
         self.renderer = TextFixedRenderer()
         self.max_rounds = max_rounds
         self.current_rounds = 0
@@ -29,9 +31,11 @@ class FixedGame:
 
             while True:
                 action = self.deep_q.choose_action(state)
+                # action = self.q_table.choose_action(state)
                 new_state, reward, dead = self.env.step(action)
                 if not self.training_complete:
                     self.deep_q.learn(state, action, reward, new_state)
+                    # self.q_table.learn(state, action, reward, new_state)
                 self.__render_round_step(new_state, action)
 
                 if not dead:
@@ -49,9 +53,11 @@ class FixedGame:
             state = self.env.reset()
             dead = False
             alive_steps = 0
-            self.q_table.set_exploration_enabled(False)
+            # self.q_table.set_exploration_enabled(False)
+            self.deep_q.set_exploration_enabled(False)
             while not dead:
-                action = self.q_table.choose_action(state)
+                # action = self.q_table.choose_action(state)
+                action = self.deep_q.choose_action(state)
                 state, reward, dead = self.env.step(action)
                 if alive_steps >= self.complete_threshold:
                     break
@@ -60,9 +66,11 @@ class FixedGame:
             print(f'{self.current_rounds} -> {alive_steps}\n')
             if alive_steps >= self.complete_threshold:
                 self.training_complete = True
-                print('QTable is frozen!\n')
+                # print('QTable is frozen!\n')
+                print('DQN is frozen!\n')
             else:
-                self.q_table.set_exploration_enabled(True)
+                # self.q_table.set_exploration_enabled(True)
+                self.deep_q.set_exploration_enabled(True)
 
     def __render_new_round(self, state):
         if self.__should_render():
