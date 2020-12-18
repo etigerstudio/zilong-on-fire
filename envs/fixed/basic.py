@@ -1,8 +1,7 @@
 # Created by ALuier Bondar on 2020/12/13.
-
 import random
 
-from env.base import BaseEnvironment
+from envs.base import BaseEnvironment
 from enum import Enum
 
 

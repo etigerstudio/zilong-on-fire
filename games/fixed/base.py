@@ -2,24 +2,30 @@
 import numpy as np
 import random
 
-# from net.q_table import QTable
-from net.deep_q import DeepQNet
-from renderer.fixed.text import TextFixedRenderer
+from renderers.fixed.text import TextFixedRenderer
 
 
 class FixedGame:
-    def __init__(self, environment, max_rounds=100000, render_interval=2000, complete_threshold=100):
+    def __init__(self, env, agent, max_rounds=100000, test_interval=2000, complete_threshold=200):
+        '''
+
+        Args:
+            env: The environment to interact with.
+            agent: The agent to use to choose actions and learn from the environment.
+            max_rounds: The maximum rounds to play.
+            test_interval: The round interval between tests.
+            complete_threshold: The alive step threshold to complete training.
+        '''
         np.random.seed(1)
         random.seed(1)
 
-        self.env = environment(random_reset=True)
-        # self.q_table = QTable(environment.STATE_SHAPE, environment.ACTIONS)
-        self.deep_q = DeepQNet(2, environment.ACTIONS)  # state_shape = 2
+        self.env = env(random_reset=True)
+        self.agent = agent
         self.renderer = TextFixedRenderer()
         self.max_rounds = max_rounds
         self.current_rounds = 0
         self.current_alive_steps = 0
-        self.render_interval = render_interval
+        self.single_train_rounds = test_interval
         self.complete_threshold = complete_threshold
         self.training_complete = False
 
@@ -30,12 +36,10 @@ class FixedGame:
             self.__render_new_round(state)
 
             while True:
-                action = self.deep_q.choose_action(state)
-                # action = self.q_table.choose_action(state)
+                action = self.agent.choose_action(state)
                 new_state, reward, dead = self.env.step(action)
                 if not self.training_complete:
-                    self.deep_q.learn(state, action, reward, new_state)
-                    # self.q_table.learn(state, action, reward, new_state)
+                    self.agent.learn(state, action, reward, new_state)
                 self.__render_round_step(new_state, action)
 
                 if not dead:
@@ -49,15 +53,13 @@ class FixedGame:
             self.current_rounds += 1
 
     def __stop_training_if_necessary(self):
-        if self.current_rounds % self.render_interval == 0:
+        if self.current_rounds % self.single_train_rounds == 0:
             state = self.env.reset()
             dead = False
             alive_steps = 0
-            # self.q_table.set_exploration_enabled(False)
-            self.deep_q.set_exploration_enabled(False)
+            self.agent.set_exploration_enabled(False)
             while not dead:
-                # action = self.q_table.choose_action(state)
-                action = self.deep_q.choose_action(state)
+                action = self.agent.choose_action(state)
                 state, reward, dead = self.env.step(action)
                 if alive_steps >= self.complete_threshold:
                     break
@@ -66,15 +68,13 @@ class FixedGame:
             print(f'{self.current_rounds} -> {alive_steps}\n')
             if alive_steps >= self.complete_threshold:
                 self.training_complete = True
-                # print('QTable is frozen!\n')
                 print('DQN is frozen!\n')
             else:
-                # self.q_table.set_exploration_enabled(True)
-                self.deep_q.set_exploration_enabled(True)
+                self.agent.set_exploration_enabled(True)
 
     def __render_new_round(self, state):
         if self.__should_render():
-            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0.1})
+            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0})
             self.renderer.update(state)
 
     def __render_round_step(self, new_state, action):
@@ -88,4 +88,4 @@ class FixedGame:
 
     def __should_render(self):
         return self.training_complete or \
-               self.current_rounds % self.render_interval == 0
+               self.current_rounds % self.single_train_rounds == 0

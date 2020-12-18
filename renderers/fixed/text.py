@@ -1,4 +1,4 @@
-from renderer.base import BaseRenderer
+from renderers.base import BaseRenderer
 from time import sleep
 
 
