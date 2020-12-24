@@ -1,5 +1,10 @@
 # Base environment implementation
+from enum import Enum
 
+
+class StateFormat(Enum):
+    VECTOR = 0
+    MATRIX = 1
 
 class BaseEnvironment:
     def step(self, action):
