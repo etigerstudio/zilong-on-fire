@@ -2,7 +2,8 @@
 import numpy as np
 import random
 
-from renderers.fixed.text import TextFixedRenderer
+# from renderer.fixed.text import TextFixedRenderer
+from renderer.fixed.twoD import TwoDFixedRenderer
 
 
 class FixedGame:
@@ -21,11 +22,11 @@ class FixedGame:
 
         self.env = env
         self.agent = agent
-        self.renderer = TextFixedRenderer()
+        self.renderer = TwoDFixedRenderer()
         self.max_rounds = max_rounds
         self.current_rounds = 0
         self.current_alive_steps = 0
-        self.single_train_rounds = test_interval
+        self.test_interval = test_interval
         self.complete_threshold = complete_threshold
         self.training_complete = False
 
@@ -53,7 +54,7 @@ class FixedGame:
             self.current_rounds += 1
 
     def __stop_training_if_necessary(self):
-        if self.current_rounds % self.single_train_rounds == 0:
+        if self.current_rounds % self.test_interval == 0:
             state = self.env.reset()
             dead = False
             alive_steps = 0
@@ -74,7 +75,7 @@ class FixedGame:
 
     def __render_new_round(self, state):
         if self.__should_render():
-            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0.1})
+            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0})
             self.renderer.update(state)
 
     def __render_round_step(self, new_state, action):
@@ -88,4 +89,4 @@ class FixedGame:
 
     def __should_render(self):
         return self.training_complete or \
-               self.current_rounds % self.single_train_rounds == 0
+               self.current_rounds % self.test_interval == 0
