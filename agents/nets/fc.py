@@ -1,5 +1,5 @@
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, Input
 
 
 class FCNet(Model):
@@ -14,3 +14,7 @@ class FCNet(Model):
         x = self.d2(x)
         y = self.d3(x)
         return y
+
+    def model(self):
+        x = Input(shape=(1, 2))
+        return Model(inputs=[x], outputs=self.call(x))
