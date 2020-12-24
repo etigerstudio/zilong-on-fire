@@ -19,7 +19,6 @@ class BasicFixedEnvironment(BaseEnvironment):
         RIGHT = 1
         NONE = 2
 
-    STATE_SHAPE = (PARTITIONS,) * 2
     ACTIONS = [
         Action.LEFT,
         Action.RIGHT,
@@ -31,7 +30,7 @@ class BasicFixedEnvironment(BaseEnvironment):
             partitions=PARTITIONS,
             arrow_distance=ARROW_DISTANCE,
             random_reset=False,
-            state_format=StateFormat.MATRIX):
+            state_format=StateFormat.VECTOR):
         self.partitions = partitions
         self.max_arrow_distance = arrow_distance
         self.random_reset = random_reset
@@ -133,3 +132,9 @@ class BasicFixedEnvironment(BaseEnvironment):
             return matrix
         else:
             raise NotImplementedError
+
+    def get_state_shape(self):
+        if self.state_format == StateFormat.VECTOR:
+            return (self.PARTITIONS,) * 2
+        elif self.state_format == StateFormat.MATRIX:
+            return (self.matrix_width,) * 2

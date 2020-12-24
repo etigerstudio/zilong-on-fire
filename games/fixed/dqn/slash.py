@@ -5,10 +5,12 @@ from agents.dqn import DeepQNet
 from agents.nets.fc import FCNet
 
 if __name__ == "__main__":
-    game = FixedGame(SlashFixedEnvironment,
-                     DeepQNet(SlashFixedEnvironment.STATE_SHAPE,
-                              SlashFixedEnvironment.ACTIONS,
-                              FCNet),
+    env = SlashFixedEnvironment()
+    agent = DeepQNet(SlashFixedEnvironment.STATE_SHAPE,
+                     SlashFixedEnvironment.ACTIONS,
+                     FCNet)
+    game = FixedGame(env,
+                     agent,
                      max_rounds=10000,
                      test_interval=200)
     game.begin()

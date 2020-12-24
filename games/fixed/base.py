@@ -19,7 +19,7 @@ class FixedGame:
         np.random.seed(1)
         random.seed(1)
 
-        self.env = env(random_reset=True)
+        self.env = env
         self.agent = agent
         self.renderer = TextFixedRenderer()
         self.max_rounds = max_rounds
@@ -74,7 +74,7 @@ class FixedGame:
 
     def __render_new_round(self, state):
         if self.__should_render():
-            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0})
+            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0.1})
             self.renderer.update(state)
 
     def __render_round_step(self, new_state, action):
