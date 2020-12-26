@@ -14,9 +14,9 @@ class DeepQNet(Model):
                  eps_decay=1,
                  reward_decay=0.9,
                  optimizer=tf.optimizers.Adam(lr=0.001),
-                 target_update_frequency=20,
-                 buffer_size=2000,
-                 batch_size=100,
+                 target_update_frequency=500,
+                 buffer_size=10000,
+                 batch_size=32,
                  gamma_discount=0.9,
                  use_one_hot=False):
         super(DeepQNet, self).__init__()
@@ -35,7 +35,7 @@ class DeepQNet(Model):
         self.target_update_frequency = target_update_frequency
         self.buffer_count = 0
         self.buffer_size = buffer_size
-        self.buffer = np.zeros((self.buffer_size, self.state_len * 2 + 2))
+        self.buffer = []
         self.batch_size = batch_size
         self.gamma_discount = gamma_discount
         self.use_one_hot = use_one_hot
@@ -46,16 +46,17 @@ class DeepQNet(Model):
         if self.exploration_enabled and random.random() < self.eps_greedy:
             return random.choice(self.actions)
         else:
-            state = np.reshape(state, (1, self.state_len))
+            # state = np.reshape(state, (1, self.state_len))
+            state = np.reshape(state, (1, 6, 6, 1))
             return self.actions[np.argmax(self.train_net(self.__to_one_hot_if_needed(state)))]
 
     def learn(self, old_state, action, reward, new_state):
         # 将与环境交互所得的序列存入buffer
-        self.buffer[self.buffer_count % self.buffer_size][0:self.state_len] = old_state
-        # print("action:", action)
-        self.buffer[self.buffer_count % self.buffer_size][self.state_len:self.state_len + 1] = action.value
-        self.buffer[self.buffer_count % self.buffer_size][self.state_len + 1:self.state_len + 2] = reward
-        self.buffer[self.buffer_count % self.buffer_size][self.state_len + 2:self.state_len * 2 + 2] = new_state
+        # print(old_state)
+        if self.buffer_count < self.buffer_size:
+            self.buffer.append((old_state, action.value, reward, new_state))
+        else:
+            self.buffer[self.buffer_count % self.buffer_size] = (old_state, action.value, reward, new_state)
         self.buffer_count += 1
 
         if self.buffer_count == self.buffer_size:
@@ -66,20 +67,24 @@ class DeepQNet(Model):
                 self.target_net.set_weights(self.train_net.get_weights())
             # 随机从buffer中取batchsize的数据
             index = random.randint(0, self.buffer_size - self.batch_size - 1)
-            b_s = self.buffer[index:index + self.batch_size, 0:self.state_len]
-            b_a = tf.constant(self.buffer[index:index + self.batch_size,
-                              self.state_len:self.state_len + 1], dtype=tf.int32)
-            b_r = tf.constant(self.buffer[index:index + self.batch_size,
-                              self.state_len + 1:self.state_len + 2], dtype=tf.float32)
-            b_s_ = self.buffer[index:index + self.batch_size, self.state_len + 2:self.state_len * 2 + 2]
-
-            # 训练网络
+            # print("buffer:", self.buffer)
+            b_s = [store[0] for store in self.buffer[index:index + self.batch_size]]
+            b_a = [store[1] for store in self.buffer[index:index + self.batch_size]]
+            b_r = [store[2] for store in self.buffer[index:index + self.batch_size]]
+            b_s_ = [store[3] for store in self.buffer[index:index + self.batch_size]]
+            b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
+            b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
+            b_a = tf.expand_dims(b_a, -1)
+            # print("ba_shape: ", tf.shape(b_a))
             with tf.GradientTape() as tape:
                 # 计算R(s)
+
                 q_output = self.train_net(self.__to_one_hot_if_needed(b_s))
 
                 # 使用b_a来选取net中最终采取的抉择带来的Q值，防止选最大一方为最后Q值后，忽略了随机选择的存在。
-                index = tf.expand_dims(tf.constant(np.arange(0, self.batch_size), dtype=tf.int32), 1)
+                index = tf.expand_dims(tf.constant(np.arange(0, self.batch_size), dtype=tf.int32), -1)
+
+                # print("shape b_a:", tf.shape(b_a))
                 index_b_a = tf.concat((index, b_a), axis=1)
                 R = tf.expand_dims(tf.gather_nd(q_output, index_b_a), 1)
 
@@ -107,9 +112,9 @@ class DeepQNet(Model):
         if self.use_one_hot:
             self.train_net(tf.zeros((1, self.state_one_hot_len)))
             self.target_net(tf.zeros((1, self.state_one_hot_len)))
-        else:
-            self.train_net(tf.zeros((1, self.state_len)))
-            self.target_net(tf.zeros((1, self.state_len)))
+        else:  # 这里需要修改
+            self.train_net(tf.ones([1, 6, 6, 1], dtype=tf.float32))
+            self.target_net(tf.ones([1, 6, 6, 1], dtype=tf.float32))
 
     def __to_one_hot_if_needed(self, state):
         return tf.constant(tf.reshape(tf.one_hot(state, 4), [-1, self.state_one_hot_len]), dtype=tf.float32) \

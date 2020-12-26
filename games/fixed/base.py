@@ -2,8 +2,8 @@
 import numpy as np
 import random
 
-# from renderer.fixed.text import TextFixedRenderer
-from renderer.fixed.twoD import TwoDFixedRenderer
+from renderers.fixed.text import TextFixedRenderer
+# from renderers.fixed.twoD import TwoDFixedRenderer
 
 
 class FixedGame:
@@ -22,7 +22,8 @@ class FixedGame:
 
         self.env = env
         self.agent = agent
-        self.renderer = TwoDFixedRenderer()
+        # self.renderer = TwoDFixedRenderer()
+        self.renderer = TextFixedRenderer()
         self.max_rounds = max_rounds
         self.current_rounds = 0
         self.current_alive_steps = 0

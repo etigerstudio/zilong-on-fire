@@ -1,4 +1,4 @@
-from renderer.base import BaseRenderer
+from renderers.base import BaseRenderer
 from time import sleep
 from multiprocessing import Process, Lock
 from enum import Enum
@@ -48,14 +48,14 @@ class TwoDFixedRenderer(BaseRenderer):
         self.WIDTH, self.HEIGHT = 1024, 500
         self.WHITE = (255, 255, 255)
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-        self.toShang = pygame.image.load('../../renderer/fixed/上.png').convert_alpha()
-        self.toZuo = pygame.image.load('../../renderer/fixed/左.png').convert_alpha()
-        self.toYou = pygame.image.load('../../renderer/fixed/右.png').convert_alpha()
-        self.toXia = pygame.image.load('../../renderer/fixed/下.png').convert_alpha()
-        self.tower1 = pygame.image.load('../../renderer/fixed/塔1.png').convert_alpha()
-        self.tower2 = pygame.image.load('../../renderer/fixed/塔2.png').convert_alpha()
-        self.tower3 = pygame.image.load('../../renderer/fixed/塔3.png').convert_alpha()
-        self.tower4 = pygame.image.load('../../renderer/fixed/塔4.png').convert_alpha()
+        self.toShang = pygame.image.load('../../renderers/fixed/上.png').convert_alpha()
+        self.toZuo = pygame.image.load('../../renderers/fixed/左.png').convert_alpha()
+        self.toYou = pygame.image.load('../../renderers/fixed/右.png').convert_alpha()
+        self.toXia = pygame.image.load('../../renderers/fixed/下.png').convert_alpha()
+        self.tower1 = pygame.image.load('../../renderers/fixed/塔1.png').convert_alpha()
+        self.tower2 = pygame.image.load('../../renderers/fixed/塔2.png').convert_alpha()
+        self.tower3 = pygame.image.load('../../renderers/fixed/塔3.png').convert_alpha()
+        self.tower4 = pygame.image.load('../../renderers/fixed/塔4.png').convert_alpha()
         self.WINNER_FONT = pygame.font.SysFont('microsoftyaqiheibold', 66)
         self.person = pygame.Rect(410, 410, 100, 100)
         self.arrow0 = pygame.Rect(200, 310, 50, 50)
