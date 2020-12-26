@@ -14,6 +14,9 @@ class BasicFixedEnvironment(BaseEnvironment):
     PARTITIONS = 4
     ARROW_DISTANCE = 2
 
+    ACTOR_POINT_VALUE = 1
+    ARROW_POINT_VALUE = 1
+
     class Action(Enum):
         LEFT = 0
         RIGHT = 1
@@ -29,16 +32,16 @@ class BasicFixedEnvironment(BaseEnvironment):
             self,
             partitions=PARTITIONS,
             arrow_distance=ARROW_DISTANCE,
-            random_reset=False,
+            random_reset=True,
             state_format=StateFormat.VECTOR):
         self.partitions = partitions
         self.max_arrow_distance = arrow_distance
         self.random_reset = random_reset
         self.state_format = state_format
         if state_format == StateFormat.MATRIX:
-            self.actor_width = 2
-            self.arrow_width = self.max_arrow_distance
-            self.matrix_width = self.actor_width + self.arrow_width * 2
+            self.matrix_actor_width = 2
+            self.matrix_arrow_width = self.max_arrow_distance
+            self.matrix_full_width = self.matrix_actor_width + self.matrix_arrow_width * 2
         self.reset()
 
     def step(self, action):
@@ -96,28 +99,28 @@ class BasicFixedEnvironment(BaseEnvironment):
 
     def __make_state_matrix(self):
         if self.partitions == 4:
-            matrix = np.zeros((self.matrix_width, self.matrix_width))
+            matrix = np.zeros((self.matrix_full_width, self.matrix_full_width))
             arrow_position = None
             moves = self.max_arrow_distance - self.current_arrow_distance
             if self.arrow_direction == 0:
-                arrow_position = [self.matrix_width - 1, 0]
+                arrow_position = [self.matrix_full_width - 1, 0]
                 arrow_position[0] += -1 * moves
                 arrow_position[1] += +1 * moves
             elif self.arrow_direction == 1:
-                arrow_position = [self.matrix_width - 1, self.matrix_width - 1]
+                arrow_position = [self.matrix_full_width - 1, self.matrix_full_width - 1]
                 arrow_position[0] += -1 * moves
                 arrow_position[1] += -1 * moves
             elif self.arrow_direction == 2:
-                arrow_position = [0, self.matrix_width - 1]
+                arrow_position = [0, self.matrix_full_width - 1]
                 arrow_position[0] += +1 * moves
                 arrow_position[1] += -1 * moves
             elif self.arrow_direction == 3:
                 arrow_position = [0, 0]
                 arrow_position[0] += +1 * moves
                 arrow_position[1] += +1 * moves
-            matrix[arrow_position[0], arrow_position[1]] = 1
+            matrix[arrow_position[0], arrow_position[1]] = self.ARROW_POINT_VALUE
 
-            actor_position = [self.arrow_width, self.arrow_width]
+            actor_position = [self.matrix_arrow_width, self.matrix_arrow_width]
             if self.actor_facing == 0:
                 actor_position[0] += 1
             elif self.actor_facing == 1:
@@ -127,7 +130,7 @@ class BasicFixedEnvironment(BaseEnvironment):
                 actor_position[1] += 1
             elif self.actor_facing == 3:
                 pass
-            matrix[actor_position[0], actor_position[1]] = 1
+            matrix[actor_position[0], actor_position[1]] = self.ACTOR_POINT_VALUE
 
             return matrix
         else:
@@ -137,4 +140,4 @@ class BasicFixedEnvironment(BaseEnvironment):
         if self.state_format == StateFormat.VECTOR:
             return (self.PARTITIONS,) * 2
         elif self.state_format == StateFormat.MATRIX:
-            return (self.matrix_width,) * 2
+            return (self.matrix_full_width,) * 2
