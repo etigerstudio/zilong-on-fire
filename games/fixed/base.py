@@ -7,8 +7,8 @@ from renderers.fixed.text import TextFixedRenderer
 
 
 class FixedGame:
-    def __init__(self, env, agent, max_rounds=100000, test_interval=2000, complete_threshold=200):
-        '''
+    def __init__(self, env, agent, renderer, max_rounds=100000, test_interval=2000, complete_threshold=200):
+        """
 
         Args:
             env: The environment to interact with.
@@ -16,14 +16,13 @@ class FixedGame:
             max_rounds: The maximum rounds to play.
             test_interval: The round interval between tests.
             complete_threshold: The alive step threshold to complete training.
-        '''
+        """
         np.random.seed(1)
         random.seed(1)
 
         self.env = env
         self.agent = agent
-        # self.renderer = TwoDFixedRenderer()
-        self.renderer = TextFixedRenderer()
+        self.renderer = renderer
         self.max_rounds = max_rounds
         self.current_rounds = 0
         self.current_alive_steps = 0
@@ -76,7 +75,7 @@ class FixedGame:
 
     def __render_new_round(self, state):
         if self.__should_render():
-            self.renderer.setup(info={'text': self.current_rounds, 'delay': 0})
+            self.renderer.setup(info={'text': self.current_rounds})
             self.renderer.update(state)
 
     def __render_round_step(self, new_state, action):
