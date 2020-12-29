@@ -7,17 +7,38 @@
   - [x] 全连接
   - [x] CNN
   - [ ] 尝试优化方法
-    - [ ] 经验回放随机算法改进
+    - [x] 经验回放随机算法改进
     - [x] 独热编码状态 （改进效果暂不清楚）
-    - [ ] batch_size和buffer_size
+    - [ ] batch_size和buffer_size超参数调优
     - [ ] eps贪心概率线性退火1到0.1
+    - [ ] 算法优化
+        - [ ] DDQN
+        - [ ] Dueling DQN
+        - [ ] Prioritized Experience Replay
+        - [ ] Rainbow
+        - [ ] HER - Hindsight Experience Replay
   - [ ] Loss可视化
+    - [ ] 累计reward
+    - [ ] 单次loss
 - [x] 简单的渲染器
 - [x] 完善基本环境
+  - [ ] Slash环境中惩罚连续挥击
 - [x] 2D渲染器
-    - [ ] 角色一步操作里转两次
-    - [ ] 箭塔、箭位置微调对齐
-- [ ] 输出二维地图的环境
+  - [ ] 角色一步操作里转两次bug？
+  - [ ] 箭塔、箭位置微调对齐
+  - [ ] 按照命名规范修改类名、文件名
+  - [ ] 组织资源文件位置
+- [x] 输出二维地图的环境
+  - [x] Basic环境
+  - [ ] Slash环境
+- [ ] 3D渲染器
+  - [ ] 游戏规则确定
+  - [ ] Unity场景构建
+  - [ ] Python-Unity通讯
+- [ ] 补充注释
+  - [ ] 类
+  - [ ] 函数
+  - [ ] 重点具体语句
 
 ## 项目组织结构
 
