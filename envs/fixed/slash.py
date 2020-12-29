@@ -29,7 +29,10 @@ class SlashFixedEnvironment(BaseEnvironment):
         Action.NONE
     ]
 
-    def __init__(self, partitions=PARTITIONS, arrow_distance=ARROW_DISTANCE, random_reset=False):
+    def __init__(self,
+                 partitions=PARTITIONS,
+                 arrow_distance=ARROW_DISTANCE,
+                 random_reset=True):
         self.partitions = partitions
         self.max_arrow_distance = arrow_distance
         self.random_reset = random_reset

@@ -9,8 +9,9 @@ if __name__ == "__main__":
     env = SlashFixedEnvironment()
     agent = DeepQNet(SlashFixedEnvironment.STATE_SHAPE,
                      SlashFixedEnvironment.ACTIONS,
-                     FCNet)
-    renderer = TextFixedRenderer(state_format=StateFormat.MATRIX)
+                     FCNet,
+                     state_format=StateFormat.VECTOR)
+    renderer = TextFixedRenderer(state_format=StateFormat.VECTOR)
     game = FixedGame(env,
                      agent,
                      renderer,
