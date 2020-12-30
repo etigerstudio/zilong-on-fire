@@ -3,8 +3,9 @@ from enum import Enum
 
 
 class StateFormat(Enum):
-    VECTOR = 0
-    MATRIX = 1
+    """环境观测/状态格式"""
+    VECTOR = 0  # 一维向量
+    MATRIX = 1  # 二维矩阵
 
 class BaseEnvironment:
     def step(self, action):

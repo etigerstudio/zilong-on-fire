@@ -31,6 +31,7 @@ class FixedGame:
         self.training_complete = False
 
     def begin(self):
+        """启动游戏 & 开始训练智能体"""
         while self.current_rounds < self.max_rounds:
             self.current_alive_steps = 0
             state = self.env.reset()
@@ -54,6 +55,7 @@ class FixedGame:
             self.current_rounds += 1
 
     def __stop_training_if_necessary(self):
+        """判断是否需要停止训练"""
         if self.current_rounds % self.test_interval == 0:
             state = self.env.reset()
             dead = False
@@ -67,6 +69,7 @@ class FixedGame:
                 alive_steps += 1
 
             print(f'{self.current_rounds} -> {alive_steps}\n')
+            # 若连续生存步数超过阈值则停止训练
             if alive_steps >= self.complete_threshold:
                 self.training_complete = True
                 print('DQN is frozen!\n')
@@ -74,19 +77,23 @@ class FixedGame:
                 self.agent.set_exploration_enabled(True)
 
     def __render_new_round(self, state):
+        """渲染新的回合"""
         if self.__should_render():
             self.renderer.setup(info={'text': self.current_rounds})
             self.renderer.update(state)
 
     def __render_round_step(self, new_state, action):
+        """渲染回合内新的一步"""
         if self.__should_render():
             self.renderer.update(new_state, info={'text': f'{action} '
                                                           f'{self.env.current_arrow_distance}'})
 
     def __render_round_end(self):
+        """渲染回合结束"""
         if self.__should_render():
             self.renderer.close(info={'text': self.current_alive_steps})
 
     def __should_render(self):
+        """是否需要渲染"""
         return self.training_complete or \
                self.current_rounds % self.test_interval == 0

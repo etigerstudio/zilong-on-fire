@@ -7,6 +7,7 @@ from agents.nets.cnn import CNNNet
 from renderers.fixed.text import TextFixedRenderer
 
 if __name__ == "__main__":
+    # 初始化环境、智能体、渲染器、游戏控制器
     env = BasicFixedEnvironment(state_format=StateFormat.MATRIX, random_reset=True)
     # agent = DeepQNet(env.get_state_shape(),
     #                  BasicFixedEnvironment.ACTIONS,

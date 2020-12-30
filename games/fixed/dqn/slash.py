@@ -6,6 +6,7 @@ from agents.nets.fc import FCNet
 from renderers.fixed.text import TextFixedRenderer
 
 if __name__ == "__main__":
+    # 初始化环境、智能体、渲染器、游戏控制器
     env = SlashFixedEnvironment()
     agent = DeepQNet(SlashFixedEnvironment.STATE_SHAPE,
                      SlashFixedEnvironment.ACTIONS,
