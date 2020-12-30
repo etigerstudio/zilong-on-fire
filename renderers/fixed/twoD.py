@@ -96,7 +96,7 @@ class TwoDFixedRenderer(BaseRenderer):
         # 在新的位置上画图
         pygame.display.update()
         
-    def arrow_move(self,arrow, arrow1, arrow2, arrow3, arrow4, person, image, i):
+    def arrow_move(self,arrow, arrow1, arrow2, arrow3, arrow4, person, i):
         '''控制箭的移动
 
         Args:
@@ -106,7 +106,6 @@ class TwoDFixedRenderer(BaseRenderer):
             arrow3: 3方向的箭的矩形
             arrow4: 4方向的箭的矩形
             person: 子龙矩阵
-            image:
             i: 表明当前箭是那个方向的
         '''
         self.result = 'not finished'
@@ -287,7 +286,7 @@ class TwoDFixedRenderer(BaseRenderer):
         elif self.arrow_direction == 3:
             arrow = self.arrow3
             i = 3
-        self.arrow_move(arrow, self.arrow0, self.arrow1, self.arrow2, self.arrow3, self.person, image, i)
+        self.arrow_move(arrow, self.arrow0, self.arrow1, self.arrow2, self.arrow3, self.person, i)
         #箭的移动函数
         self.draw_lose()
         #画出是否失败
