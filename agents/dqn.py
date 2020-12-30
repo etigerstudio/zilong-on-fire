@@ -7,6 +7,7 @@ from envs.base import StateFormat
 
 
 class DeepQNet(Model):
+    """基于神经网络的强化学习"""
     def __init__(self,
                  state_shape,
                  actions,
@@ -21,6 +22,23 @@ class DeepQNet(Model):
                  batch_size=32,
                  gamma_discount=0.9,
                  use_one_hot=False):
+        """
+
+        Args:
+            state_shape: 状态的shape
+            actions: 动作
+            net: 选取的网络
+            state_format: 状态的格式，默认是矩阵
+            eps_greedy: 探索的概率
+            eps_decay: 探索衰减率
+            reward_decay: 回报衰减率
+            optimizer: 网络优化器
+            target_update_frequency: 每多少轮训练后更新目标网络
+            buffer_size: 记忆的容量
+            batch_size: 每次训练的batch的大小
+            gamma_discount: 计算真实累积回报时，R_next的比重
+            use_one_hot: 是否使用独热码
+        """
         super(DeepQNet, self).__init__()
         self.state_shape = state_shape
         self.state_len = len(state_shape)
@@ -45,6 +63,15 @@ class DeepQNet(Model):
         self.__init_net_weights()
 
     def choose_action(self, state):
+        """通过当前状态选择一个动作
+
+        Args:
+            state: 输入状态
+
+        Returns:
+            action：选择的动作
+
+        """
         # print(state, np.shape(state))
         if self.exploration_enabled and random.random() < self.eps_greedy:
             return random.choice(self.actions)
@@ -53,6 +80,14 @@ class DeepQNet(Model):
             return self.actions[np.argmax(self.train_net(self.__preprocess_state(state)))]
 
     def learn(self, old_state, action, reward, new_state):
+        """缓存游戏的经验并训练网络
+
+        Args:
+            old_state: 当前状态
+            action: 当前状态下采取的动作
+            reward: 该动作的奖励
+            new_state: 采取动作后环境的新状态
+        """
         self.__save_to_buffer(old_state, action.value, reward, new_state)
         self.sample_count += 1
 

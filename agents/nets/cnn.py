@@ -4,6 +4,11 @@ from tensorflow.keras.layers import Conv2D, Flatten, Dense, Input
 
 class CNNNet(Model):
     def __init__(self, output_dim=3):
+        """
+
+        Args:
+            output_dim: 网络需要三个输出，对应3个动作的累积回报
+        """
         super(CNNNet, self).__init__()
         self.c1 = Conv2D(filters=4, kernel_size=(3, 3), padding='same', activation='relu')  # 卷积层
         # self.c2 = Conv2D(filters=6, kernel_size=(3, 3), padding='same', activation='relu')  # 卷积层

@@ -4,6 +4,11 @@ from tensorflow.keras.layers import Dense, Input
 
 class FCNet(Model):
     def __init__(self, output_dim=3):
+        """
+
+        Args:
+            output_dim: 网络需要三个输出，对应3个动作的累积回报
+        """
         super(FCNet, self).__init__()
         self.d1 = Dense(8, activation='relu')
         self.d2 = Dense(24, activation='relu')
