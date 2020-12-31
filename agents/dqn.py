@@ -13,8 +13,11 @@ class DeepQNet(Model):
                  actions,
                  net,
                  state_format=StateFormat.MATRIX,
-                 eps_greedy=0.25,
-                 eps_decay=1,
+                 eps_initial=1.0,
+                 eps_minimun=0.15,
+                 eps_decay_mode="LINEAR",
+                 eps_decay_steps=1000,
+                 eps_decay=1.0,
                  reward_decay=0.9,
                  optimizer=tf.optimizers.Adam(lr=0.001),
                  target_update_frequency=50,
@@ -30,7 +33,11 @@ class DeepQNet(Model):
             net: 选取的网络
             state_format: 状态的格式，默认是矩阵
             eps_greedy: 探索的概率
-            eps_decay: 探索衰减率
+            eps_initial: 探索概率的初始值
+            eps_minimun：探索概率的最小值
+            eps_decay_mode: 探索概率的衰减模式，可以是LINEAR或者EXPONENTIAL
+            eps_decay_steps: 探索概率将在多少轮后衰减到最小值，仅在探索概率衰减模式是LINEAR时有用
+            eps_decay: 探索衰减率，仅在探索概率衰减模式是EXPONENTIAL时有用
             reward_decay: 回报衰减率
             optimizer: 网络优化器
             target_update_frequency: 每多少轮训练后更新目标网络
@@ -47,7 +54,11 @@ class DeepQNet(Model):
         self.actions = actions
         self.train_net = net(len(actions))
         self.target_net = net(len(actions))
-        self.eps_greedy = eps_greedy
+        self.eps_initial = eps_initial
+        self.eps_minimun = eps_minimun
+        self.eps_greedy = self.eps_initial
+        self.eps_decay_mode = eps_decay_mode
+        self.eps_decay_steps = eps_decay_steps
         self.eps_decay = eps_decay
         self.reward_decay = reward_decay
         self.optimizer = optimizer
@@ -111,7 +122,8 @@ class DeepQNet(Model):
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 
             self.learn_time += 1
-        self.eps_greedy *= self.eps_decay
+        self.eps_greedy = self.__update_eps()
+        # print('eps: ', self.eps_greedy)
 
     def set_exploration_enabled(self, enabled):
         self.exploration_enabled = enabled
@@ -181,5 +193,17 @@ class DeepQNet(Model):
             self.buffer[self.sample_count % self.buffer_size][self.state_len + 2:self.state_len * 2 + 2] = new_state
         elif self.state_format == StateFormat.MATRIX:
             self.buffer[self.sample_count % self.buffer_size] = (old_state, action, reward, new_state)
+        else:
+            raise NotImplementedError
+
+    def __update_eps(self):
+        if self.eps_decay_mode == 'LINEAR':
+            eps = self.eps_initial-(self.eps_initial-self.eps_minimun)*self.learn_time/self.eps_decay_steps
+            if eps > self.eps_minimun:
+                return eps
+            else:
+                return self.eps_minimun
+        elif self.eps_decay_mode == 'EXPONENTIAL':
+            return self.eps_greedy*self.eps_decay
         else:
             raise NotImplementedError
