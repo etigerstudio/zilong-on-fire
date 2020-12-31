@@ -50,14 +50,14 @@ class TwoDFixedRenderer(BaseRenderer):
         self.WIDTH, self.HEIGHT = 1024, 500 #定义窗体大小
         self.WHITE = (255, 255, 255) #白色
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT)) #定义窗体对象
-        self.toShang = pygame.image.load('../../renderer/fixed/上.png').convert_alpha()
-        self.toZuo = pygame.image.load('../../renderer/fixed/左.png').convert_alpha()
-        self.toYou = pygame.image.load('../../renderer/fixed/右.png').convert_alpha()
-        self.toXia = pygame.image.load('../../renderer/fixed/下.png').convert_alpha()
-        self.tower1 = pygame.image.load('../../renderer/fixed/塔1.png').convert_alpha()
-        self.tower2 = pygame.image.load('../../renderer/fixed/塔2.png').convert_alpha()
-        self.tower3 = pygame.image.load('../../renderer/fixed/塔3.png').convert_alpha()
-        self.tower4 = pygame.image.load('../../renderer/fixed/塔4.png').convert_alpha()
+        self.toShang = pygame.image.load('../../../renderers/fixed/上.png').convert_alpha()
+        self.toZuo = pygame.image.load('../../../renderers/fixed/左.png').convert_alpha()
+        self.toYou = pygame.image.load('../../../renderers/fixed/右.png').convert_alpha()
+        self.toXia = pygame.image.load('../../../renderers/fixed/下.png').convert_alpha()
+        self.tower1 = pygame.image.load('../../../renderers/fixed/塔1.png').convert_alpha()
+        self.tower2 = pygame.image.load('../../../renderers/fixed/塔2.png').convert_alpha()
+        self.tower3 = pygame.image.load('../../../renderers/fixed/塔3.png').convert_alpha()
+        self.tower4 = pygame.image.load('../../../renderers/fixed/塔4.png').convert_alpha()
         #使用通道方法加载图片保证图片透明
         self.WINNER_FONT = pygame.font.SysFont('microsoftyaqiheibold', 66)#定义字体
         self.person = pygame.Rect(410, 410, 100, 100)
@@ -91,7 +91,7 @@ class TwoDFixedRenderer(BaseRenderer):
         self.screen.blit(tower3, (60, 560))
         self.screen.blit(tower4, (700, 560))
         #绘制图像
-        arrow_img = pygame.image.load('../../renderer/fixed/arrow' + str(i) + '.png').convert_alpha()
+        arrow_img = pygame.image.load('../../../renderers/fixed/arrow' + str(i) + '.png').convert_alpha()
         self.screen.blit(arrow_img, (arrow.x, arrow.y))
         # 在新的位置上画图
         pygame.display.update()
