@@ -7,6 +7,7 @@ class StateFormat(Enum):
     VECTOR = 0  # 一维向量
     MATRIX = 1  # 二维矩阵
 
+
 class BaseEnvironment:
     def step(self, action):
         """Perform one timestep.
@@ -17,7 +18,9 @@ class BaseEnvironment:
         Returns:
             new_state: The new environment state.
             reward: The reward for the action.
-            dead: Whether the actor has died or not.
+            game_over: Whether current round of game is over.
+                For example, if the actor is dead or when the actor
+                win the game, then current round of game is over.
         """
         raise NotImplementedError
 

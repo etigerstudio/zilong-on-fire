@@ -4,5 +4,6 @@ from envs.rpg.entities.treasure import Treasure
 
 
 class TreasureTutorial(Level):
-    def init(self):
-        return 8, 8, [Actor([7, 3]), Treasure([0, 3])]
+    @staticmethod
+    def init():
+        return 8, 8, [Actor([3, 0]), Treasure([4, 7])]

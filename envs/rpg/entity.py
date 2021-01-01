@@ -10,7 +10,12 @@ class Entity:
         raise NotImplementedError
 
     def update(self, world):
-        """Gets called every timestep."""
+        """Gets called every timestep.
+
+            Returns:
+                reward: The reward for current timestep.
+                    None means 0 rewards.
+        """
         raise NotImplementedError
 
     def destroy(self, world):
