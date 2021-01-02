@@ -34,15 +34,15 @@ class RPGEnvironment(BaseEnvironment):
         Action.FORWARD_WALK,
         Action.RIGHTWARD_WALK,
         Action.BACKWARD_WALK,
-        Action.LEFTWARD_JUMP,
-        Action.FORWARD_JUMP,
-        Action.RIGHTWARD_JUMP,
-        Action.BACKWARD_JUMP,
-        Action.LEFTWARD_SLASH,
-        Action.FORWARD_SLASH,
-        Action.RIGHTWARD_SLASH,
-        Action.BACKWARD_SLASH,
-        Action.CROUCH
+        # Action.LEFTWARD_JUMP,
+        # Action.FORWARD_JUMP,
+        # Action.RIGHTWARD_JUMP,
+        # Action.BACKWARD_JUMP,
+        # Action.LEFTWARD_SLASH,
+        # Action.FORWARD_SLASH,
+        # Action.RIGHTWARD_SLASH,
+        # Action.BACKWARD_SLASH,
+        # Action.CROUCH
     ]
 
     __ACTION_MAPPINGS = {
@@ -72,3 +72,6 @@ class RPGEnvironment(BaseEnvironment):
     def reset(self):
         self.world.reset()
         return np.array(self.world.get_matrix_representation())
+
+    def get_state_shape(self):
+        return self.world.level_width, self.world.level_height

@@ -4,9 +4,9 @@ from enum import Enum
 class World:
     BLANK_SPACE_VALUE = 0
     TIME_LIMIT = 10
-    ACTOR_ALIVE_REWARD = 1
+    ACTOR_ALIVE_REWARD = 0
     ACTOR_DEAD_REWARD = -1
-    TIMESTEP_EXPIRATION_REWARD = -10
+    TIMESTEP_EXPIRATION_REWARD = -1
 
     class Status(Enum):
         PLAYING = 0

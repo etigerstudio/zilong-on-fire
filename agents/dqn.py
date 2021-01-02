@@ -122,8 +122,7 @@ class DeepQNet(Model):
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 
             self.learn_time += 1
-        self.eps_greedy = self.__update_eps()
-        # print('eps: ', self.eps_greedy)
+        self.__update_eps()
 
     def set_exploration_enabled(self, enabled):
         self.exploration_enabled = enabled
@@ -146,7 +145,7 @@ class DeepQNet(Model):
         if self.state_format == StateFormat.VECTOR:
             return np.reshape(state, (1, self.state_len))
         elif self.state_format == StateFormat.MATRIX:
-            return np.reshape(state, (1, 6, 6, 1))
+            return np.reshape(state, (1, *self.state_shape, 1))
         else:
             raise NotImplementedError
 
@@ -179,7 +178,7 @@ class DeepQNet(Model):
             b_s_ = [store[3] for store in random_buffer]
             b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
             b_a = tf.expand_dims(b_a, -1)
-            b_r = tf.expand_dims(b_r, -1)
+            b_r = tf.cast(tf.expand_dims(b_r, -1), dtype=tf.float32)
             b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
         else:
             raise NotImplementedError
@@ -197,13 +196,14 @@ class DeepQNet(Model):
             raise NotImplementedError
 
     def __update_eps(self):
-        if self.eps_decay_mode == 'LINEAR':
-            eps = self.eps_initial-(self.eps_initial-self.eps_minimun)*self.learn_time/self.eps_decay_steps
-            if eps > self.eps_minimun:
-                return eps
+        if self.eps_decay_mode is not None:
+            if self.eps_decay_mode == 'LINEAR':
+                eps = self.eps_initial-(self.eps_initial-self.eps_minimun)*self.learn_time/self.eps_decay_steps
+                if eps > self.eps_minimun:
+                    self.eps_greedy = eps
+                else:
+                    self.eps_greedy = self.eps_minimun
+            elif self.eps_decay_mode == 'EXPONENTIAL':
+                self.eps_greedy *= self.eps_decay
             else:
-                return self.eps_minimun
-        elif self.eps_decay_mode == 'EXPONENTIAL':
-            return self.eps_greedy*self.eps_decay
-        else:
-            raise NotImplementedError
+                raise NotImplementedError

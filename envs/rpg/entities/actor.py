@@ -9,7 +9,7 @@ class Actor(Entity):
     class Pose(Enum):
         STANDING = 0
         CROUCHING = 1
-        JUMPING = 1
+        JUMPING = 2
 
     class Movement(Enum):
         IDLE = 0
@@ -31,7 +31,7 @@ class Actor(Entity):
     def start(self, world):
         self.pose = Actor.Pose.STANDING
         self.status = Actor.Status.ALIVE
-        self.prev_movement_offset = None, None  # Jump direction
+        self.prev_movement_offset = None  # Jump direction
 
     def update(self, world):
         self.__handle_actor_input(world, *world.input)
@@ -43,10 +43,11 @@ class Actor(Entity):
 
     def __handle_actor_input(self, world, actor_movement, actor_spell):
         # Handle jumping in 2nd timestep
-        if self.pose == Actor.Pose.JUMPING:
+        if self.pose == Actor.Pose.JUMPING and \
+                self.prev_movement_offset is not None:
             self.pose = Actor.Pose.STANDING
             self.__move_actor(world, *self.prev_movement_offset)
-            self.prev_movement_offset = None, None
+            self.prev_movement_offset = None
             return
 
         # Handle idle or crouching

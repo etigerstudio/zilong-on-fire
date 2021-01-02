@@ -3,8 +3,8 @@ from envs.rpg.levels.teasure_tutorial import TreasureTutorial
 import numpy as np
 
 
-def adjust_matrix(maxtrix):
-    return np.flip(np.transpose(maxtrix), axis=0)
+def adjust_matrix(matrix):
+    return np.flip(np.transpose(matrix), axis=0)
 
 if __name__ == "__main__":
     env = RPGEnvironment(TreasureTutorial)
