@@ -2,7 +2,7 @@ from envs.rpg.entity import Entity
 
 
 class Treasure(Entity):
-    REPRESENTATION = 2
+    REPRESENTATION = 1
     TREASURE_REWARD = 1
 
     def start(self, world):
@@ -12,7 +12,7 @@ class Treasure(Entity):
         actor = world.get_actor_entity()
         if actor.position == self.position:
             world.status = world.Status.WON
-        return self.TREASURE_REWARD
+            return self.TREASURE_REWARD
 
     def destroy(self, world):
         pass

@@ -1,10 +1,13 @@
 from enum import Enum
+import numpy as np
+from envs.rpg.entities.actor import Actor
+from envs.rpg.entities.treasure import Treasure
 
 
 class World:
     BLANK_SPACE_VALUE = 0
-    TIME_LIMIT = 10
-    ACTOR_ALIVE_REWARD = 0
+    TIME_LIMIT = 7
+    # ACTOR_ALIVE_REWARD = 0
     ACTOR_DEAD_REWARD = -1
     TIMESTEP_EXPIRATION_REWARD = -1
 
@@ -17,12 +20,12 @@ class World:
     def __init__(self,
                  level,
                  time_limit=TIME_LIMIT,
-                 alive_reward=ACTOR_ALIVE_REWARD,
+                 # alive_reward=ACTOR_ALIVE_REWARD,
                  dead_reward=ACTOR_DEAD_REWARD,
                  timestep_expiration_reward=TIMESTEP_EXPIRATION_REWARD):
         self.level_stub = level
         self.time_limit = time_limit
-        self.alive_reward = alive_reward
+        # self.alive_reward = alive_reward
         self.dead_reward = dead_reward
         self.timestep_expiration_reward = timestep_expiration_reward
         self.__reset_world()
@@ -40,6 +43,7 @@ class World:
         """
         # Forwarding input
         self.input = actor_movement, actor_spell
+        prev_default_reward = self.__get_current_default_reward()
 
         game_over, reward = False, 0
         for e in self.entities:  # TODO: Ensure actor is updated first.
@@ -47,7 +51,7 @@ class World:
             if r is not None:
                 reward += r
         if reward == 0:
-            reward = World.ACTOR_ALIVE_REWARD
+            reward = self.__get_current_default_reward() - prev_default_reward
 
         # Check if actor has died
         if self.status == World.Status.DEFEATED_ACTOR_DIED:
@@ -75,6 +79,7 @@ class World:
         self.level_height, \
         self.entities = self.level_stub.init()
         self.__start_entities()
+        self.__reset_default_rewards()
         self.status = self.Status.PLAYING
         self.time_elapsed = 0
         self.input = None, None
@@ -83,8 +88,29 @@ class World:
         for e in self.entities:
             e.start(self)
 
+    def __reset_default_rewards(self):
+        max_distance = self.level_width + self.level_height - 2
+        pos_x, pos_y = self.get_entity_by_type(Treasure).position
+
+        self.default_rewards = np.zeros((self.level_width, self.level_height))
+        for x in range(0, self.level_width):
+            for y in range(0, self.level_height):
+                self.default_rewards[x][y] = 1 - (abs(x - pos_x) + abs(y - pos_y)) / max_distance
+
+    def __get_current_default_reward(self):
+        actor_position = self.get_actor_entity().position
+        return self.default_rewards[(*actor_position,)]
+
     def get_actor_entity(self):
-        return self.entities[0]  # TODO: More robust logic
+        return self.get_entity_by_type(Actor)
+
+    def get_entity_by_type(self, etype):
+        """Find an entity by its type."""
+        for e in self.entities:
+            if isinstance(e, etype):
+                return e
+
+        return None
 
     def get_entity_by_position(self, position):
         """Find an entity by its position."""
@@ -95,12 +121,10 @@ class World:
         return None
 
     def get_matrix_representation(self):
-        matrix = []
-        for i in range(0, self.level_height):
-            matrix.append([0] * self.level_width)
+        matrix = np.zeros((self.level_width, self.level_height))
 
         for e in self.entities:
-            matrix[e.position[0]][e.position[1]] = e.REPRESENTATION
+            matrix[(*e.position,)] = e.REPRESENTATION
 
         return matrix
 

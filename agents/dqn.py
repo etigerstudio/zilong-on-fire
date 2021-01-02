@@ -14,7 +14,7 @@ class DeepQNet(Model):
                  net,
                  state_format=StateFormat.MATRIX,
                  eps_initial=1.0,
-                 eps_minimun=0.15,
+                 eps_minimum=0.15,
                  eps_decay_mode="LINEAR",
                  eps_decay_steps=1000,
                  eps_decay=1.0,
@@ -55,7 +55,7 @@ class DeepQNet(Model):
         self.train_net = net(len(actions))
         self.target_net = net(len(actions))
         self.eps_initial = eps_initial
-        self.eps_minimun = eps_minimun
+        self.eps_minimun = eps_minimum
         self.eps_greedy = self.eps_initial
         self.eps_decay_mode = eps_decay_mode
         self.eps_decay_steps = eps_decay_steps
@@ -118,6 +118,8 @@ class DeepQNet(Model):
                 R_truth = b_r + self.gamma_discount * R_next
 
                 loss = tf.reduce_mean(tf.losses.MSE(R_truth, R))
+                if self.learn_time % 25 == 0:
+                    print(f'loss: {loss} epoch: {self.learn_time}\n')
                 gradients = tape.gradient(loss, self.train_net.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 

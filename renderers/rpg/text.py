@@ -12,7 +12,7 @@ class TextRPGRenderer(BaseRenderer):
         sleep(self.delay)
 
     def update(self, state, info=None):
-        print(self.__adjust_matrix(state))
+        print(self.__adjust_matrix(state), info)
         sleep(self.delay)
 
     def close(self, info=None):

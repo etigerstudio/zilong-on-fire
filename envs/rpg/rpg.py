@@ -11,10 +11,10 @@ class RPGEnvironment(BaseEnvironment):
         """动作枚举"""
         IDLE = 0
 
-        LEFTWARD_WALK = 1
-        FORWARD_WALK = 2
-        RIGHTWARD_WALK = 3
-        BACKWARD_WALK = 4
+        LEFTWARD_WALK = 0
+        FORWARD_WALK = 1
+        RIGHTWARD_WALK = 2
+        BACKWARD_WALK = 3
 
         LEFTWARD_JUMP = 5
         FORWARD_JUMP = 6
@@ -29,7 +29,7 @@ class RPGEnvironment(BaseEnvironment):
         CROUCH = 13
 
     ACTIONS = [
-        Action.IDLE,
+        # Action.IDLE,
         Action.LEFTWARD_WALK,
         Action.FORWARD_WALK,
         Action.RIGHTWARD_WALK,
@@ -46,7 +46,7 @@ class RPGEnvironment(BaseEnvironment):
     ]
 
     __ACTION_MAPPINGS = {
-        Action.IDLE: (Actor.Movement.IDLE, Actor.Spell.IDLE),
+        # Action.IDLE: (Actor.Movement.IDLE, Actor.Spell.IDLE),
         Action.LEFTWARD_WALK: (Actor.Movement.LEFTWARD, Actor.Spell.IDLE),
         Action.FORWARD_WALK: (Actor.Movement.FORWARD, Actor.Spell.IDLE),
         Action.RIGHTWARD_WALK: (Actor.Movement.RIGHTWARD, Actor.Spell.IDLE),

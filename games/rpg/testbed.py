@@ -12,11 +12,13 @@ if __name__ == "__main__":
     agent = DeepQNet(env.get_state_shape(),
                      RPGEnvironment.ACTIONS,
                      CNNNet,
-                     state_format=StateFormat.MATRIX)
+                     state_format=StateFormat.MATRIX,
+                     eps_minimum=0.35,
+                     eps_decay_steps=2500)
     renderer = TextRPGRenderer()
     game = RPGGame(env,
                    agent,
                    renderer,
                    max_rounds=100000,
-                   test_interval=200)
+                   test_interval=75)
     game.begin()

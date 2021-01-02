@@ -3,9 +3,18 @@ from envs.rpg.world import World
 import numpy as np
 import random
 
+np.random.seed(1)
+random.seed(1)
+
 
 class RPGGame:
-    def __init__(self, env, agent, renderer, max_rounds=100000, test_interval=2000):
+    def __init__(self,
+                 env,
+                 agent,
+                 renderer,
+                 max_rounds=100000,
+                 test_interval=2000,
+                 complete_threshold=25):
         """
 
         Args:
@@ -15,8 +24,6 @@ class RPGGame:
             test_interval: The round interval between tests.
             complete_threshold: The alive step threshold to complete training.
         """
-        np.random.seed(1)
-        random.seed(1)
 
         self.env = env
         self.agent = agent
@@ -25,6 +32,7 @@ class RPGGame:
         self.current_rounds = 0
         self.current_alive_steps = 0
         self.test_interval = test_interval
+        self.complete_threshold = complete_threshold
         self.training_complete = False
 
     def begin(self):
@@ -39,7 +47,7 @@ class RPGGame:
                 new_state, reward, game_over = self.env.step(action)
                 if not self.training_complete:
                     self.agent.learn(state, action, reward, new_state)
-                self.__render_round_step(new_state, action)
+                self.__render_round_step(new_state, (action, reward))
 
                 if not game_over:
                     state = new_state
@@ -55,19 +63,25 @@ class RPGGame:
         """判断是否需要停止训练"""
         if self.current_rounds % self.test_interval == 0:
             state = self.env.reset()
-            game_over = False
             self.agent.set_exploration_enabled(False)
-            while not game_over:
+            rounds_won = 0
+            while True:
                 action = self.agent.choose_action(state)
                 state, reward, game_over = self.env.step(action)
 
-            print(f'{self.current_rounds} -> {self.env.world.status}\n')
-            # 若连续生存步数超过阈值则停止训练
-            if self.env.world.status == World.Status.WON:
-                self.training_complete = True
-                print('DQN is frozen!\n')
-            else:
-                self.agent.set_exploration_enabled(True)
+                if game_over:
+                    if self.env.world.status == World.Status.WON:
+                        rounds_won += 1
+                        # 若连续生存步数超过阈值则停止训练
+                        if rounds_won >= self.complete_threshold:
+                            self.training_complete = True
+                            print(f'DQN is frozen! current round:{self.current_rounds}\n')
+                            break
+                        state = self.env.reset()
+                    else:
+                        print(f'{self.current_rounds} -> {rounds_won}\n')
+                        self.agent.set_exploration_enabled(True)
+                        break
 
     def __render_new_round(self, state):
         """渲染新的回合"""
@@ -78,7 +92,7 @@ class RPGGame:
     def __render_round_step(self, new_state, action):
         """渲染回合内新的一步"""
         if self.__should_render():
-            self.renderer.update(new_state)
+            self.renderer.update(new_state, action)
 
     def __render_round_end(self):
         """渲染回合结束"""

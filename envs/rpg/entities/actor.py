@@ -1,10 +1,9 @@
 from envs.rpg.entity import Entity
 from enum import Enum
-from envs.rpg.world import World
 
 
 class Actor(Entity):
-    REPRESENTATION = 1
+    REPRESENTATION = 0.5
 
     class Pose(Enum):
         STANDING = 0
@@ -39,28 +38,28 @@ class Actor(Entity):
 
     def destroy(self, world):
         self.status = Actor.Status.DEAD
-        world.status = World.Status.DEFEATED_ACTOR_DIED
+        world.status = world.Status.DEFEATED_ACTOR_DIED
 
     def __handle_actor_input(self, world, actor_movement, actor_spell):
         # Handle jumping in 2nd timestep
-        if self.pose == Actor.Pose.JUMPING and \
-                self.prev_movement_offset is not None:
-            self.pose = Actor.Pose.STANDING
-            self.__move_actor(world, *self.prev_movement_offset)
-            self.prev_movement_offset = None
-            return
-
-        # Handle idle or crouching
-        if actor_movement == Actor.Movement.IDLE:
-            self.pose = Actor.Pose.STANDING
-            return
-        elif actor_movement == Actor.Movement.CROUCH:
-            self.pose = Actor.Pose.CROUCHING
-            return
-
-        # Handle slashing
-        if actor_spell == Actor.Spell.SLASH:
-            raise NotImplementedError  # TODO: Implement Slash Spell
+        # if self.pose == Actor.Pose.JUMPING and \
+        #         self.prev_movement_offset is not None:
+        #     self.pose = Actor.Pose.STANDING
+        #     self.__move_actor(world, *self.prev_movement_offset)
+        #     self.prev_movement_offset = None
+        #     return
+        #
+        # # Handle idle or crouching
+        # if actor_movement == Actor.Movement.IDLE:
+        #     self.pose = Actor.Pose.STANDING
+        #     return
+        # elif actor_movement == Actor.Movement.CROUCH:
+        #     self.pose = Actor.Pose.CROUCHING
+        #     return
+        #
+        # # Handle slashing
+        # if actor_spell == Actor.Spell.SLASH:
+        #     raise NotImplementedError  # TODO: Implement Slash Spell
 
         # Handle moving or jumping in 1st timestep
         offset_x, offset_y = None, None
@@ -72,13 +71,13 @@ class Actor(Entity):
             offset_x, offset_y = 1, 0
         elif actor_movement == Actor.Movement.BACKWARD:
             offset_x, offset_y = 0, -1
-        if actor_spell == Actor.Spell.JUMP:
-            self.pose = Actor.Pose.JUMPING
-            self.prev_movement_offset = offset_x, offset_y
-        elif actor_spell == Actor.Spell.IDLE:
-            pass
-        else:
-            raise NotImplementedError
+        # if actor_spell == Actor.Spell.JUMP:
+        #     self.pose = Actor.Pose.JUMPING
+        #     self.prev_movement_offset = offset_x, offset_y
+        # elif actor_spell == Actor.Spell.IDLE:
+        #     pass
+        # else:
+        #     raise NotImplementedError
         self.__move_actor(world, offset_x, offset_y)
 
     def __move_actor(self, world, offset_x, offset_y):
@@ -86,7 +85,9 @@ class Actor(Entity):
         new_position_y = self.position[1] + offset_y
         if new_position_x >= world.level_width or new_position_x < 0:
             new_position_x = self.position[0]
+            self.destroy(world)  # Moved out of the world, punish!
         if new_position_y >= world.level_height or new_position_y < 0:
             new_position_y = self.position[1]
+            self.destroy(world)  # Moved out of the world, punish!
 
         self.position = [new_position_x, new_position_y]
