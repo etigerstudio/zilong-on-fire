@@ -13,12 +13,17 @@ if __name__ == "__main__":
                      RPGEnvironment.ACTIONS,
                      CNNNet,
                      state_format=StateFormat.MATRIX,
+                     eps_initial=1,
                      eps_minimum=0.35,
-                     eps_decay_steps=2500)
+                     eps_decay_steps=5000,
+                     target_update_frequency=50,
+                     buffer_size=2000,
+                     learning_rate=0.0005)
     renderer = TextRPGRenderer()
     game = RPGGame(env,
                    agent,
                    renderer,
                    max_rounds=100000,
-                   test_interval=75)
+                   test_interval=100,
+                   should_render_training=False)
     game.begin()

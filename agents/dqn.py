@@ -19,7 +19,8 @@ class DeepQNet(Model):
                  eps_decay_steps=1000,
                  eps_decay=1.0,
                  reward_decay=0.9,
-                 optimizer=tf.optimizers.Adam(lr=0.001),
+                 optimizer=tf.optimizers.Adam,
+                 learning_rate=0.001,
                  target_update_frequency=50,
                  buffer_size=2000,
                  batch_size=32,
@@ -61,7 +62,7 @@ class DeepQNet(Model):
         self.eps_decay_steps = eps_decay_steps
         self.eps_decay = eps_decay
         self.reward_decay = reward_decay
-        self.optimizer = optimizer
+        self.optimizer = optimizer(lr=learning_rate)
         self.exploration_enabled = True
         self.learn_time = 0
         self.target_update_frequency = target_update_frequency
@@ -118,7 +119,7 @@ class DeepQNet(Model):
                 R_truth = b_r + self.gamma_discount * R_next
 
                 loss = tf.reduce_mean(tf.losses.MSE(R_truth, R))
-                if self.learn_time % 25 == 0:
+                if self.learn_time % 200 == 0:  # Loss dumper, will be removed in future
                     print(f'loss: {loss} epoch: {self.learn_time}\n')
                 gradients = tape.gradient(loss, self.train_net.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))

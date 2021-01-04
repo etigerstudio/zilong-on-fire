@@ -14,7 +14,8 @@ class RPGGame:
                  renderer,
                  max_rounds=100000,
                  test_interval=2000,
-                 complete_threshold=25):
+                 complete_threshold=25,
+                 should_render_training=True):
         """
 
         Args:
@@ -34,6 +35,7 @@ class RPGGame:
         self.test_interval = test_interval
         self.complete_threshold = complete_threshold
         self.training_complete = False
+        self.should_render_training = should_render_training
 
     def begin(self):
         """启动游戏 & 开始训练智能体"""
@@ -102,4 +104,5 @@ class RPGGame:
     def __should_render(self):
         """是否需要渲染"""
         return self.training_complete or \
+               self.should_render_training and \
                self.current_rounds % self.test_interval == 0
