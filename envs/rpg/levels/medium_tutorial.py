@@ -21,4 +21,4 @@ class MediumTutorial(Level):
             Treasure([randrange(6), 4 + randrange(2)])
         ]
 
-        return 6, 6, 15, entities
+        return 6, 6, 25, entities

@@ -24,4 +24,4 @@ class LargeTutorial(Level):
             Treasure([5, 5])
         ]
 
-        return 6, 6, 20, entities
+        return 6, 6, 30, entities

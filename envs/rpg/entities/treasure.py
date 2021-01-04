@@ -3,7 +3,7 @@ from envs.rpg.entity import Entity
 
 class Treasure(Entity):
     REPRESENTATION = 3
-    TREASURE_REWARD = 1
+    TREASURE_REWARD = 10  # if 1, net won't converge
 
     def start(self, world):
         pass
