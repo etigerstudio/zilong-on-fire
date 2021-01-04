@@ -2,12 +2,12 @@ from enum import Enum
 import numpy as np
 from envs.rpg.entities.actor import Actor
 from envs.rpg.entities.treasure import Treasure
+from envs.rpg.entity import Entity
 
 
 class World:
     BLANK_SPACE_VALUE = 0
-    TIME_LIMIT = 7
-    # ACTOR_ALIVE_REWARD = 0
+    ACTOR_ALIVE_REWARD = 1
     ACTOR_DEAD_REWARD = -1
     TIMESTEP_EXPIRATION_REWARD = -1
 
@@ -19,13 +19,11 @@ class World:
 
     def __init__(self,
                  level,
-                 time_limit=TIME_LIMIT,
-                 # alive_reward=ACTOR_ALIVE_REWARD,
+                 alive_reward=ACTOR_ALIVE_REWARD,
                  dead_reward=ACTOR_DEAD_REWARD,
                  timestep_expiration_reward=TIMESTEP_EXPIRATION_REWARD):
         self.level_stub = level
-        self.time_limit = time_limit
-        # self.alive_reward = alive_reward
+        self.alive_reward = alive_reward
         self.dead_reward = dead_reward
         self.timestep_expiration_reward = timestep_expiration_reward
         self.__reset_world()
@@ -51,7 +49,8 @@ class World:
             if r is not None:
                 reward += r
         if reward == 0:
-            reward = self.__get_current_default_reward() - prev_default_reward
+            reward = self.ACTOR_ALIVE_REWARD
+            # reward = self.__get_current_default_reward() - prev_default_reward
 
         # Check if actor has died
         if self.status == World.Status.DEFEATED_ACTOR_DIED:
@@ -77,6 +76,7 @@ class World:
     def __reset_world(self):
         self.level_width, \
         self.level_height, \
+        self.time_limit, \
         self.entities = self.level_stub.init()
         self.__start_entities()
         self.__reset_default_rewards()
@@ -120,12 +120,17 @@ class World:
 
         return None
 
+    def remove_entity(self, entity):
+        self.entities.remove(entity)
+
     def get_matrix_representation(self):
         matrix = np.zeros((self.level_width, self.level_height))
 
         for e in self.entities:
-            matrix[(*e.position,)] = e.REPRESENTATION
+            matrix[(*e.position,)] = e.REPRESENTATION / Entity.ENTITY_TYPE_COUNT
+        matrix[(*self.get_actor_entity().position,)] = 1  # Reset actor's representation in case of overlapping
 
+        matrix = np.pad(matrix, ((2, 2), (2, 2)), 'constant', constant_values=((0.25, 0.25), (0.25, 0.25)))
         return matrix
 
     def get_text_representation(self):

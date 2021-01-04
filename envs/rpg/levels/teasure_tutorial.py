@@ -7,5 +7,5 @@ from random import randrange
 class TreasureTutorial(Level):
     @staticmethod
     def init():
-        # return 4, 4, [Actor([0, 0]), Treasure([2, 2])]
-        return 4, 4, [Actor([randrange(4), randrange(2)]), Treasure([randrange(4), 2 + randrange(2)])]
+        return 4, 4, 8, [Actor([0, 0]), Treasure([2, 2])]
+        # return 4, 4, 8, [Actor([randrange(4), randrange(2)]), Treasure([randrange(4), 2 + randrange(2)])]

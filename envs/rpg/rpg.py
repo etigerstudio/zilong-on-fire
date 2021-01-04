@@ -7,26 +7,28 @@ import numpy as np
 
 
 class RPGEnvironment(BaseEnvironment):
+    STATE_PADDING = 2
+
     class Action(Enum):
         """动作枚举"""
-        IDLE = 0
+        # IDLE = 0
 
         LEFTWARD_WALK = 0
         FORWARD_WALK = 1
         RIGHTWARD_WALK = 2
         BACKWARD_WALK = 3
 
-        LEFTWARD_JUMP = 5
-        FORWARD_JUMP = 6
-        RIGHTWARD_JUMP = 7
-        BACKWARD_JUMP = 8
+        LEFTWARD_JUMP = 4
+        FORWARD_JUMP = 5
+        RIGHTWARD_JUMP = 6
+        BACKWARD_JUMP = 7
 
-        LEFTWARD_SLASH = 9
-        FORWARD_SLASH = 10
-        RIGHTWARD_SLASH = 11
-        BACKWARD_SLASH = 12
+        LEFTWARD_SLASH = 8
+        FORWARD_SLASH = 9
+        RIGHTWARD_SLASH = 10
+        BACKWARD_SLASH = 11
 
-        CROUCH = 13
+        # CROUCH = 12
 
     ACTIONS = [
         # Action.IDLE,
@@ -34,14 +36,14 @@ class RPGEnvironment(BaseEnvironment):
         Action.FORWARD_WALK,
         Action.RIGHTWARD_WALK,
         Action.BACKWARD_WALK,
-        # Action.LEFTWARD_JUMP,
-        # Action.FORWARD_JUMP,
-        # Action.RIGHTWARD_JUMP,
-        # Action.BACKWARD_JUMP,
-        # Action.LEFTWARD_SLASH,
-        # Action.FORWARD_SLASH,
-        # Action.RIGHTWARD_SLASH,
-        # Action.BACKWARD_SLASH,
+        Action.LEFTWARD_JUMP,
+        Action.FORWARD_JUMP,
+        Action.RIGHTWARD_JUMP,
+        Action.BACKWARD_JUMP,
+        Action.LEFTWARD_SLASH,
+        Action.FORWARD_SLASH,
+        Action.RIGHTWARD_SLASH,
+        Action.BACKWARD_SLASH,
         # Action.CROUCH
     ]
 
@@ -59,7 +61,7 @@ class RPGEnvironment(BaseEnvironment):
         Action.FORWARD_SLASH: (Actor.Movement.FORWARD, Actor.Spell.SLASH),
         Action.RIGHTWARD_SLASH: (Actor.Movement.RIGHTWARD, Actor.Spell.SLASH),
         Action.BACKWARD_SLASH: (Actor.Movement.BACKWARD, Actor.Spell.SLASH),
-        Action.CROUCH: (Actor.Movement.CROUCH, Actor.Spell.IDLE)
+        # Action.CROUCH: (Actor.Movement.CROUCH, Actor.Spell.IDLE)
     }
 
     def __init__(self, level):
@@ -74,4 +76,5 @@ class RPGEnvironment(BaseEnvironment):
         return np.array(self.world.get_matrix_representation())
 
     def get_state_shape(self):
-        return self.world.level_width, self.world.level_height
+        return self.world.level_width + self.STATE_PADDING * 2,\
+               self.world.level_height + self.STATE_PADDING * 2

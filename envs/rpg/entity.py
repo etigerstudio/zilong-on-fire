@@ -1,9 +1,11 @@
 class Entity:
     REPRESENTATION = 0
+    ENTITY_TYPE_COUNT = 4  # Count of all entity types
 
     def __init__(self, position):
         """Initialize an entity with its position."""
         self.position = position
+        self.representation = self.REPRESENTATION
 
     def start(self, world):
         """Gets called once when added to a world."""

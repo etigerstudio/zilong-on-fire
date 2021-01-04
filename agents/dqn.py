@@ -56,7 +56,7 @@ class DeepQNet(Model):
         self.train_net = net(len(actions))
         self.target_net = net(len(actions))
         self.eps_initial = eps_initial
-        self.eps_minimun = eps_minimum
+        self.eps_minimum = eps_minimum
         self.eps_greedy = self.eps_initial
         self.eps_decay_mode = eps_decay_mode
         self.eps_decay_steps = eps_decay_steps
@@ -73,6 +73,7 @@ class DeepQNet(Model):
         self.gamma_discount = gamma_discount
         self.use_one_hot = use_one_hot
         self.__init_net_weights()
+        self.loss_history = []
 
     def choose_action(self, state):
         """通过当前状态选择一个动作
@@ -119,8 +120,11 @@ class DeepQNet(Model):
                 R_truth = b_r + self.gamma_discount * R_next
 
                 loss = tf.reduce_mean(tf.losses.MSE(R_truth, R))
-                if self.learn_time % 200 == 0:  # Loss dumper, will be removed in future
-                    print(f'loss: {loss} epoch: {self.learn_time}\n')
+
+                self.loss_history.append(loss)
+                if self.learn_time % 1000 == 0:  # Loss dumper, will be removed in future
+                    print(f'loss: {np.sum(self.loss_history) / 1000} epoch: {self.learn_time}\n')
+                    self.loss_history = []
                 gradients = tape.gradient(loss, self.train_net.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 
@@ -201,11 +205,11 @@ class DeepQNet(Model):
     def __update_eps(self):
         if self.eps_decay_mode is not None:
             if self.eps_decay_mode == 'LINEAR':
-                eps = self.eps_initial-(self.eps_initial-self.eps_minimun)*self.learn_time/self.eps_decay_steps
-                if eps > self.eps_minimun:
+                eps = self.eps_initial - (self.eps_initial - self.eps_minimum) * self.learn_time / self.eps_decay_steps
+                if eps > self.eps_minimum:
                     self.eps_greedy = eps
                 else:
-                    self.eps_greedy = self.eps_minimun
+                    self.eps_greedy = self.eps_minimum
             elif self.eps_decay_mode == 'EXPONENTIAL':
                 self.eps_greedy *= self.eps_decay
             else:

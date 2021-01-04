@@ -1,10 +1,5 @@
 # Game controller implementation
 from envs.rpg.world import World
-import numpy as np
-import random
-
-np.random.seed(1)
-random.seed(1)
 
 
 class RPGGame:

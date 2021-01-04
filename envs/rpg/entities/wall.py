@@ -1,9 +1,8 @@
 from envs.rpg.entity import Entity
 
 
-class Treasure(Entity):
-    REPRESENTATION = 3
-    TREASURE_REWARD = 1
+class Wall(Entity):
+    REPRESENTATION = 5
 
     def start(self, world):
         pass
@@ -11,8 +10,9 @@ class Treasure(Entity):
     def update(self, world):
         actor = world.get_actor_entity()
         if actor.position == self.position:
-            world.status = world.Status.WON
-            return self.TREASURE_REWARD
+            offset = actor.prev_movement_offset
+            actor.position[0] -= offset[0]
+            actor.position[1] -= offset[1]
 
     def destroy(self, world):
         pass
