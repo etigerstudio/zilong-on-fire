@@ -4,6 +4,7 @@ from tensorflow.keras import Model
 import random
 import numpy as np
 from envs.base import StateFormat
+from matplotlib import pyplot as plt
 
 
 class DeepQNet(Model):
@@ -74,6 +75,7 @@ class DeepQNet(Model):
         self.use_one_hot = use_one_hot
         self.__init_net_weights()
         self.loss_history = []
+        self.train_loss_results = []
 
     def choose_action(self, state):
         """通过当前状态选择一个动作
@@ -122,6 +124,7 @@ class DeepQNet(Model):
                 loss = tf.reduce_mean(tf.losses.MSE(R_truth, R))
 
                 self.loss_history.append(loss)
+                self.train_loss_results.append(loss)
                 if self.learn_time % 1000 == 0:  # Loss dumper, will be removed in future
                     print(f'loss: {np.sum(self.loss_history) / 1000} epoch: {self.learn_time}\n')
                     self.loss_history = []
@@ -214,3 +217,12 @@ class DeepQNet(Model):
                 self.eps_greedy *= self.eps_decay
             else:
                 raise NotImplementedError
+
+    def print_loss_plot(self):
+        # 绘制 loss 曲线
+        plt.title('Loss Function Curve')  # 图片标题
+        plt.xlabel('Epoch')  # x轴变量名称
+        plt.ylabel('Loss')  # y轴变量名称
+        plt.plot(self.train_loss_results, label="$Loss$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.legend()  # 画出曲线图标
+        plt.show()  # 画出图像

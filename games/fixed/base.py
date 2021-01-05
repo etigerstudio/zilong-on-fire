@@ -1,6 +1,7 @@
 # Game controller implementation
 import numpy as np
 import random
+from matplotlib import pyplot as plt
 
 from renderers.fixed.text import TextFixedRenderer
 # from renderers.fixed.twoD import TwoDFixedRenderer
@@ -29,6 +30,9 @@ class FixedGame:
         self.test_interval = test_interval
         self.complete_threshold = complete_threshold
         self.training_complete = False
+        self.survival_time_all = []
+        self.reward_count = 0
+        self.reward_count_all = []
 
     def begin(self):
         """启动游戏 & 开始训练智能体"""
@@ -43,11 +47,15 @@ class FixedGame:
                 if not self.training_complete:
                     self.agent.learn(state, action, reward, new_state)
                 self.__render_round_step(new_state, action)
+                self.reward_count += reward
 
                 if not dead:
                     state = new_state
                     self.current_alive_steps += 1
                 else:
+                    self.survival_time_all.append(self.current_alive_steps)
+                    self.reward_count_all.append(self.reward_count)
+                    self.reward_count = 0
                     self.__render_round_end()
                     break
 
@@ -73,6 +81,9 @@ class FixedGame:
             if alive_steps >= self.complete_threshold:
                 self.training_complete = True
                 print('DQN is frozen!\n')
+                self.agent.print_loss_plot()
+                self.__print_survival_time_plot()
+                self.__print_accumulated_reward_plot()
             else:
                 self.agent.set_exploration_enabled(True)
 
@@ -97,3 +108,19 @@ class FixedGame:
         """是否需要渲染"""
         return self.training_complete or \
                self.current_rounds % self.test_interval == 0
+
+    def __print_survival_time_plot(self):
+        plt.title('Survival Time Curve')  # 图片标题
+        plt.xlabel('Round')  # x轴变量名称
+        plt.ylabel('Survival Time')  # y轴变量名称
+        plt.plot(self.survival_time_all, label="$Survival Time$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.legend()  # 画出曲线图标
+        plt.show()  # 画出图像
+
+    def __print_accumulated_reward_plot(self):
+        plt.title('Accumulated Reward Curve')  # 图片标题
+        plt.xlabel('Round')  # x轴变量名称
+        plt.ylabel('Accumulated Reward')  # y轴变量名称
+        plt.plot(self.reward_count_all, label="$Accumulated Reward$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.legend()  # 画出曲线图标
+        plt.show()  # 画出图像
