@@ -4,6 +4,7 @@ from envs.rpg.levels.teasure_tutorial import TreasureTutorial
 from envs.rpg.levels.medium_tutorial import MediumTutorial
 from envs.rpg.levels.large_tutorial import LargeTutorial
 from envs.rpg.levels.small_tutorial import SmallTutorial
+from envs.rpg.levels.slash_spike import SlashSpike
 from renderers.rpg.text import TextRPGRenderer
 from agents.dqn import DeepQNet
 from agents.nets.cnn import CNNNet
@@ -18,14 +19,14 @@ random.seed(1)
 
 if __name__ == "__main__":
     # 初始化环境、智能体、渲染器、游戏控制器
-    env = RPGEnvironment(SmallTutorial)
+    env = RPGEnvironment(SlashSpike)
     agent = DeepQNet(env.get_state_shape(),
                      RPGEnvironment.ACTIONS,
                      CNN2Net,
                      state_format=StateFormat.MATRIX,
                      eps_initial=1,
                      eps_minimum=0.15,
-                     eps_decay_steps=5000,
+                     eps_decay_steps=7500,
                      target_update_frequency=100,
                      buffer_size=2000,
                      learning_rate=0.001,

@@ -13,8 +13,7 @@ class CNN2Net(Model):
         self.c1 = Conv2D(filters=16, kernel_size=(3, 3), activation='relu')  # 卷积层
         # self.c2 = Conv2D(filters=6, kernel_size=(3, 3), padding='same', activation='relu')  # 卷积层
         self.flatten = Flatten()
-        self.d1 = Dense(32, activation='relu')
-        self.d2 = Dense(16, activation='relu')
+        self.d1 = Dense(64, activation='relu')
         self.d3 = Dense(output_dim)
 
     def call(self, x):

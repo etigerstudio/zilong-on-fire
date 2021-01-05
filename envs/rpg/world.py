@@ -7,7 +7,7 @@ from envs.rpg.entity import Entity
 
 class World:
     BLANK_SPACE_VALUE = 0
-    ACTOR_ALIVE_REWARD = 1
+    ACTOR_ALIVE_REWARD = 0
     ACTOR_DEAD_REWARD = -1
     TIMESTEP_EXPIRATION_REWARD = -1
 

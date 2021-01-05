@@ -112,27 +112,25 @@ class DeepQNet(Model):
             if self.learn_time % self.target_update_frequency == 0:
                 self.target_net.set_weights(self.train_net.get_weights())
             b_s, b_a, b_r, b_s_ = self.__sample_from_buffer()
+
+            R_next = tf.expand_dims(tf.reduce_max(self.target_net(self.__preprocess_state(b_s_)), axis=1), 1)
+            R_truth = b_r + self.gamma_discount * R_next
+
             with tf.GradientTape() as tape:
                 q_output = self.train_net(self.__preprocess_state(b_s))
-                index = tf.expand_dims(tf.constant(np.arange(0, self.batch_size), dtype=tf.int32), -1)
-                index_b_a = tf.concat((index, b_a), axis=1)
-
-                R = tf.expand_dims(tf.gather_nd(q_output, index_b_a), 1)
-                R_next = tf.expand_dims(tf.reduce_max(self.target_net(self.__preprocess_state(b_s_)), axis=1), 1)
-                R_truth = b_r + self.gamma_discount * R_next
-
+                R = tf.expand_dims(tf.gather_nd(q_output, b_a, batch_dims=1), 1)
                 loss = tf.reduce_mean(tf.losses.MSE(R_truth, R))
-
-                self.loss_history.append(loss)
-                self.train_loss_results.append(loss)
-                if self.learn_time % 1000 == 0:  # Loss dumper, will be removed in future
-                    print(f'loss: {np.sum(self.loss_history) / 1000} epoch: {self.learn_time}\n')
-                    self.loss_history = []
                 gradients = tape.gradient(loss, self.train_net.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 
             self.learn_time += 1
-        self.__update_eps()
+
+            self.loss_history.append(loss)
+            self.train_loss_results.append(loss)
+            if self.learn_time % 200 == 0:  # Loss dumper, will be removed in future
+                print(f'loss: {np.sum(self.loss_history) / 200} epoch: {self.learn_time}\n')
+                self.loss_history = []
+            self.__update_eps()
 
     def set_exploration_enabled(self, enabled):
         self.exploration_enabled = enabled

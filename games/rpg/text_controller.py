@@ -1,5 +1,7 @@
 from envs.rpg.rpg import RPGEnvironment
 from envs.rpg.levels.large_tutorial import LargeTutorial
+from envs.rpg.levels.small_tutorial import SmallTutorial
+from envs.rpg.levels.slash_spike import SlashSpike
 
 import numpy as np
 import random
@@ -12,7 +14,7 @@ def adjust_matrix(matrix):
     return np.flip(np.transpose(matrix), axis=0)
 
 if __name__ == "__main__":
-    env = RPGEnvironment(LargeTutorial)
+    env = RPGEnvironment(SlashSpike)
     print(adjust_matrix(env.reset()))
 
     game_over = False
