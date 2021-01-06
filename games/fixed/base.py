@@ -110,17 +110,40 @@ class FixedGame:
                self.current_rounds % self.test_interval == 0
 
     def __print_survival_time_plot(self):
+        # 计算滑动平均, 取前50组的平均值
+        average_x = [50]
+        average_y = []
+        sum = 0
+        for i in range(0, 50):
+            sum += self.survival_time_all[i]
+        average_y.append(sum/50)
+        for i in range(50, len(self.survival_time_all)):
+            sum = sum + self.survival_time_all[i] - self.survival_time_all[i-50]
+            average_x.append(i)
+            average_y.append(sum/50)
         plt.title('Survival Time Curve')  # 图片标题
         plt.xlabel('Round')  # x轴变量名称
         plt.ylabel('Survival Time')  # y轴变量名称
-        plt.plot(self.survival_time_all, label="$Survival Time$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.plot(self.survival_time_all, label="$Survival Time$")  # 逐点画出survival_time值并连线，连线图标是Survival Time
+        plt.plot(average_x, average_y, label="$Average Survival Time$")  # 逐点画出average_survival_time值并连线，连线图标是Average survival time
         plt.legend()  # 画出曲线图标
         plt.show()  # 画出图像
 
     def __print_accumulated_reward_plot(self):
+        average_x = [50]
+        average_y = []
+        sum = 0
+        for i in range(0, 50):
+            sum += self.reward_count_all[i]
+        average_y.append(sum/50)
+        for i in range(50, len(self.reward_count_all)):
+            sum = sum + self.reward_count_all[i] - self.reward_count_all[i - 50]
+            average_x.append(i)
+            average_y.append(sum/50)
         plt.title('Accumulated Reward Curve')  # 图片标题
         plt.xlabel('Round')  # x轴变量名称
         plt.ylabel('Accumulated Reward')  # y轴变量名称
-        plt.plot(self.reward_count_all, label="$Accumulated Reward$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.plot(self.reward_count_all, label="$Accumulated Reward$")  # 逐点画出reward值并连线，连线图标是Accumulated Reward
+        plt.plot(average_x, average_y, label="$Average Accumulated Reward$")  # 逐点画出reward值并连线，连线图标是Accumulated Reward
         plt.legend()  # 画出曲线图标
         plt.show()  # 画出图像

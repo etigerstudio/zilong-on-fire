@@ -217,10 +217,22 @@ class DeepQNet(Model):
                 raise NotImplementedError
 
     def print_loss_plot(self):
+        # 计算滑动平均, 取前50组的平均值
+        average_x = [50]
+        average_y = []
+        sum = 0
+        for i in range(0, 50):
+            sum += self.train_loss_results[i]
+        average_y.append(sum/50)
+        for i in range(50, len(self.train_loss_results)):
+            sum = sum + self.train_loss_results[i] - self.train_loss_results[i-50]
+            average_x.append(i)
+            average_y.append(sum/50)
         # 绘制 loss 曲线
         plt.title('Loss Function Curve')  # 图片标题
         plt.xlabel('Epoch')  # x轴变量名称
         plt.ylabel('Loss')  # y轴变量名称
         plt.plot(self.train_loss_results, label="$Loss$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
+        plt.plot(average_x, average_y, label="$Average Loss$")  # 逐点画出average_loss值并连线，连线图标是Average Loss
         plt.legend()  # 画出曲线图标
         plt.show()  # 画出图像
