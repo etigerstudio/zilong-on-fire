@@ -14,7 +14,7 @@ def adjust_matrix(matrix):
     return np.flip(np.transpose(matrix), axis=0)
 
 if __name__ == "__main__":
-    env = RPGEnvironment(SlashSpike)
+    env = RPGEnvironment(LargeTutorial)
     print(adjust_matrix(env.reset()))
 
     game_over = False

@@ -4,6 +4,7 @@ from enum import Enum
 
 class Actor(Entity):
     REPRESENTATION = 4
+    VAIN_SLASH_REWARD = -0.125
 
     class Pose(Enum):
         STANDING = 0
@@ -33,8 +34,10 @@ class Actor(Entity):
         self.prev_movement_offset = None  # For jump direction & wall collision
 
     def update(self, world):
-        self.__handle_actor_input(world, *world.input)
+        reward = self.__handle_actor_input(world, *world.input)
         world.input = None
+        if reward is not None:
+            return reward
 
     def destroy(self, world):
         self.status = Actor.Status.DEAD
@@ -76,8 +79,9 @@ class Actor(Entity):
                                   self.position[1] + offset_y]
                 entity = world.get_entity_by_position(slash_position)
                 if entity is not None:
-                    entity.destroy(world)
-                offset_x, offset_y = 0, 0
+                    return entity.destroy(world)
+                else:
+                    return self.VAIN_SLASH_REWARD
             else:
                 raise NotImplementedError
 

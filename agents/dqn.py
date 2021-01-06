@@ -22,7 +22,8 @@ class DeepQNet(Model):
                  reward_decay=0.9,
                  optimizer=tf.optimizers.Adam,
                  learning_rate=0.001,
-                 target_update_frequency=50,
+                 train_freq=4,
+                 target_update_freq=50,
                  buffer_size=2000,
                  batch_size=32,
                  gamma_discount=0.9,
@@ -42,7 +43,8 @@ class DeepQNet(Model):
             eps_decay: 探索衰减率，仅在探索概率衰减模式是EXPONENTIAL时有用
             reward_decay: 回报衰减率
             optimizer: 网络优化器
-            target_update_frequency: 每多少轮训练后更新目标网络
+            train_freq: 连续网络训练轮次之间间隔的时间步
+            target_update_freq: 每多少轮训练后更新目标网络
             buffer_size: 记忆的容量
             batch_size: 每次训练的batch的大小
             gamma_discount: 计算真实累积回报时，R_next的比重
@@ -65,9 +67,10 @@ class DeepQNet(Model):
         self.reward_decay = reward_decay
         self.optimizer = optimizer(lr=learning_rate)
         self.exploration_enabled = True
-        self.learn_time = 0
-        self.target_update_frequency = target_update_frequency
-        self.sample_count = 0
+        self.network_train_times = 0
+        self.sample_learn_times = 0
+        self.train_freq = train_freq
+        self.target_update_freq = target_update_freq
         self.buffer_size = buffer_size
         self.__init_buffer()
         self.batch_size = batch_size
@@ -94,7 +97,7 @@ class DeepQNet(Model):
             state = self.__reshape_state(state)
             return self.actions[np.argmax(self.train_net(self.__preprocess_state(state)))]
 
-    def learn(self, old_state, action, reward, new_state):
+    def learn(self, old_state, action, reward, new_state, game_over=None):
         """缓存游戏的经验并训练网络
 
         Args:
@@ -103,18 +106,22 @@ class DeepQNet(Model):
             reward: 该动作的奖励
             new_state: 采取动作后环境的新状态
         """
-        self.__save_to_buffer(old_state, action.value, reward, new_state)
-        self.sample_count += 1
+        # Storing
+        self.__save_to_buffer(old_state, action.value, reward, new_state, game_over)
+        self.sample_learn_times += 1
 
-        if self.sample_count == self.buffer_size:
+        if self.sample_learn_times == self.buffer_size:
             print("DQN Training Began!\n")
-        if self.sample_count >= self.buffer_size:
-            if self.learn_time % self.target_update_frequency == 0:
+
+        # Training
+        if self.sample_learn_times % self.train_freq == 0 and \
+                self.sample_learn_times >= self.buffer_size:
+            if self.network_train_times % self.target_update_freq == 0:
                 self.target_net.set_weights(self.train_net.get_weights())
-            b_s, b_a, b_r, b_s_ = self.__sample_from_buffer()
+            b_s, b_a, b_r, b_s_, b_d = self.__sample_from_buffer()
 
             R_next = tf.expand_dims(tf.reduce_max(self.target_net(self.__preprocess_state(b_s_)), axis=1), 1)
-            R_truth = b_r + self.gamma_discount * R_next
+            R_truth = b_r + (1 - b_d) * self.gamma_discount * R_next  # b_d == 1 when in terminal state
 
             with tf.GradientTape() as tape:
                 q_output = self.train_net(self.__preprocess_state(b_s))
@@ -123,12 +130,12 @@ class DeepQNet(Model):
                 gradients = tape.gradient(loss, self.train_net.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients, self.train_net.trainable_variables))
 
-            self.learn_time += 1
+            self.network_train_times += 1
 
             self.loss_history.append(loss)
             self.train_loss_results.append(loss)
-            if self.learn_time % 200 == 0:  # Loss dumper, will be removed in future
-                print(f'loss: {np.sum(self.loss_history) / 200} epoch: {self.learn_time}\n')
+            if self.network_train_times % 200 == 0:  # Loss dumper, will be removed in future
+                print(f'loss: {np.sum(self.loss_history) / 200} epoch: {self.network_train_times}\n')
                 self.loss_history = []
             self.__update_eps()
 
@@ -148,6 +155,8 @@ class DeepQNet(Model):
             self.target_net.build((1, *self.state_shape, 1))
         else:
             raise NotImplementedError
+
+        self.target_net.set_weights(self.train_net.get_weights())
 
     def __reshape_state(self, state):
         if self.state_format == StateFormat.VECTOR:
@@ -170,43 +179,48 @@ class DeepQNet(Model):
             raise NotImplementedError
 
     def __sample_from_buffer(self):
-        random_buffer = None
-        b_s, b_a, b_r, b_s_ = None, None, None, None
         if self.state_format == StateFormat.VECTOR:
             random_buffer = random.sample(range(self.buffer_size), self.batch_size)
             b_s = tf.constant(self.buffer[random_buffer, 0:self.state_len], dtype=tf.float32)
             b_a = tf.constant(self.buffer[random_buffer, self.state_len:self.state_len + 1], dtype=tf.int32)
             b_r = tf.constant(self.buffer[random_buffer, self.state_len + 1:self.state_len + 2], dtype=tf.float32)
             b_s_ = tf.constant(self.buffer[random_buffer, self.state_len + 2:self.state_len * 2 + 2], dtype=tf.float32)
+            b_d = tf.constant(self.buffer[random_buffer, self.state_len * 2 + 2:self.state_len * 2 + 3], dtype=tf.float32)
         elif self.state_format == StateFormat.MATRIX:
             random_buffer = random.sample(self.buffer, self.batch_size)
-            b_s = [store[0] for store in random_buffer]
-            b_a = [store[1] for store in random_buffer]
-            b_r = [store[2] for store in random_buffer]
-            b_s_ = [store[3] for store in random_buffer]
+            b_s, b_a, b_r, b_s_, b_d = [], [], [], [], []
+            for s, a, r, s_, d in random_buffer:
+                b_s.append(s)
+                b_a.append(a)
+                b_r.append(r)
+                b_s_.append(s_)
+                b_d.append(d)
             b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
-            b_a = tf.expand_dims(b_a, -1)
+            b_a = tf.cast(tf.expand_dims(b_a, -1), dtype=tf.int32)
             b_r = tf.cast(tf.expand_dims(b_r, -1), dtype=tf.float32)
             b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
+            b_d = tf.cast(tf.expand_dims(b_d, -1), dtype=tf.float32)
         else:
             raise NotImplementedError
-        return b_s, b_a, b_r, b_s_
 
-    def __save_to_buffer(self, old_state, action, reward, new_state):
+        return b_s, b_a, b_r, b_s_, b_d
+
+    def __save_to_buffer(self, old_state, action, reward, new_state, game_over=None):
         if self.state_format == StateFormat.VECTOR:
-            self.buffer[self.sample_count % self.buffer_size][0:self.state_len] = old_state
-            self.buffer[self.sample_count % self.buffer_size][self.state_len:self.state_len + 1] = action
-            self.buffer[self.sample_count % self.buffer_size][self.state_len + 1:self.state_len + 2] = reward
-            self.buffer[self.sample_count % self.buffer_size][self.state_len + 2:self.state_len * 2 + 2] = new_state
+            self.buffer[self.sample_learn_times % self.buffer_size][0:self.state_len] = old_state
+            self.buffer[self.sample_learn_times % self.buffer_size][self.state_len:self.state_len + 1] = action
+            self.buffer[self.sample_learn_times % self.buffer_size][self.state_len + 1:self.state_len + 2] = reward
+            self.buffer[self.sample_learn_times % self.buffer_size][self.state_len + 2:self.state_len * 2 + 2] = new_state
+            self.buffer[self.sample_learn_times % self.buffer_size][self.state_len * 2 + 2:self.state_len * 2 + 3] = game_over
         elif self.state_format == StateFormat.MATRIX:
-            self.buffer[self.sample_count % self.buffer_size] = (old_state, action, reward, new_state)
+            self.buffer[self.sample_learn_times % self.buffer_size] = (old_state, action, reward, new_state, game_over)
         else:
             raise NotImplementedError
 
     def __update_eps(self):
         if self.eps_decay_mode is not None:
             if self.eps_decay_mode == 'LINEAR':
-                eps = self.eps_initial - (self.eps_initial - self.eps_minimum) * self.learn_time / self.eps_decay_steps
+                eps = self.eps_initial - (self.eps_initial - self.eps_minimum) * self.network_train_times / self.eps_decay_steps
                 if eps > self.eps_minimum:
                     self.eps_greedy = eps
                 else:

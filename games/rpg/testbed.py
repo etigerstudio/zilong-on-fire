@@ -13,9 +13,11 @@ from games.rpg.game import RPGGame
 
 import numpy as np
 import random
+import tensorflow as tf
 
 np.random.seed(1)
 random.seed(1)
+tf.random.set_seed(1)
 
 if __name__ == "__main__":
     # 初始化环境、智能体、渲染器、游戏控制器
@@ -26,8 +28,9 @@ if __name__ == "__main__":
                      state_format=StateFormat.MATRIX,
                      eps_initial=1,
                      eps_minimum=0.15,
-                     eps_decay_steps=7500,
-                     target_update_frequency=100,
+                     eps_decay_steps=15000,
+                     train_freq=4,
+                     target_update_freq=100,
                      buffer_size=2000,
                      learning_rate=0.001,
                      batch_size=64)

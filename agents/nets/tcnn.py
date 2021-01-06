@@ -11,11 +11,10 @@ class TCNNNet(Model):
             output_dim: 网络需要n个输出，对应n个动作的累积回报
         """
         super(TCNNNet, self).__init__()
-        self.c1 = Conv2D(filters=4, kernel_size=(3, 3), padding='same', activation='relu')  # 卷积层
-        # self.c2 = Conv2D(filters=6, kernel_size=(3, 3), padding='same', activation='relu')  # 卷积层
+        self.c1 = Conv2D(filters=16, kernel_size=(4, 4), strides=2, activation='relu')  # 卷积层
+        self.c2 = Conv2D(filters=32, kernel_size=(3, 3), strides=1, activation='relu')  # 卷积层
         self.flatten = Flatten()
-        self.d1 = Dense(8, activation='relu')
-        self.d2 = Dense(24, activation='relu')
+        self.d1 = Dense(64, activation='relu')
         self.d3 = Dense(output_dim)
         self.t = 0
         self.t_max = None

@@ -12,7 +12,7 @@ class Spike(Entity):
         actor = world.get_actor_entity()
         if not actor.pose == actor.Pose.JUMPING and \
                 actor.position == self.position:
-            world.status = world.Status.DEFEATED_ACTOR_DIED
+            actor.destroy(world)
             return self.SPIKE_REWARD
 
     def destroy(self, world):
