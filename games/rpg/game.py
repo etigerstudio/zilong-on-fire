@@ -1,6 +1,7 @@
 # Game controller implementation
 from envs.rpg.world import World
-
+from matplotlib import pyplot as plt
+import datetime
 
 class RPGGame:
     def __init__(self,
@@ -35,6 +36,10 @@ class RPGGame:
         self.complete_threshold = complete_threshold
         self.training_complete = False
         self.should_render_training = should_render_training
+        self.survival_time_all = []
+        self.reward_count = 0
+        self.reward_count_all = []
+        self.save_path = "default"
 
     def begin(self):
         """启动游戏 & 开始训练智能体"""
@@ -42,19 +47,22 @@ class RPGGame:
             self.current_alive_steps = 0
             state = self.env.reset()
             self.__render_new_round(state)
-
             while True:
                 action = self.agent.choose_action(state)
                 new_state, reward, game_over = self.env.step(action)
                 if not self.training_complete:
                     self.agent.learn(state, action, reward, new_state, game_over)
                 self.__render_round_step(new_state, (action, reward))
+                self.reward_count += reward
 
                 if not game_over:
                     state = new_state
                     self.current_alive_steps += 1
                     self.current_timestep += 1
                 else:
+                    self.survival_time_all.append(self.current_alive_steps)
+                    self.reward_count_all.append(self.reward_count)
+                    self.reward_count = 0
                     self.__render_round_end()
                     break
 
@@ -79,9 +87,14 @@ class RPGGame:
                     if self.env.world.status == World.Status.WON:
                         rounds_won += 1
                         # 若连续生存步数超过阈值则停止训练
-                        if rounds_won >= self.complete_threshold:
+                        if rounds_won >= self.complete_threshold or self.current_rounds > 2000:
                             self.training_complete = True
                             print(f'DQN is frozen! round:{self.current_rounds} timestep:{self.current_timestep}\n')
+                            self.save_path = str(datetime.datetime.now().timestamp())
+                            self.agent.target_net.save("../../model/rpg/" + self.save_path)
+                            self.agent.print_loss_plot(self.save_path)
+                            self.__print_survival_time_plot()
+                            self.__print_accumulated_reward_plot()
                             break
                         state = self.env.reset()
                     else:
@@ -113,3 +126,45 @@ class RPGGame:
         return self.training_complete or \
                self.should_render_training and \
                self.current_rounds % self.test_interval == 0
+
+    def __print_survival_time_plot(self):
+        # 计算滑动平均, 取前50组的平均值
+        average_x = [50]
+        average_y = []
+        sum = 0
+        for i in range(0, 50):
+            sum += self.survival_time_all[i]
+        average_y.append(sum/50)
+        for i in range(50, len(self.survival_time_all)):
+            sum = sum + self.survival_time_all[i] - self.survival_time_all[i-50]
+            average_x.append(i)
+            average_y.append(sum/50)
+        plt.title('Survival Time Curve')  # 图片标题
+        plt.xlabel('Round')  # x轴变量名称
+        plt.ylabel('Survival Time')  # y轴变量名称
+        plt.plot(self.survival_time_all, label="$Survival Time$")  # 逐点画出survival_time值并连线，连线图标是Survival Time
+        plt.plot(average_x, average_y, label="$Average Survival Time$")  # 逐点画出average_survival_time值并连线，连线图标是Average survival time
+        plt.legend()  # 画出曲线图标
+        plt.savefig("../../model/rpg/" + self.save_path + '/Survival Time Curve.png')
+        # plt.savefig('./Survival Time Curve.png')
+        plt.show()  # 画出图像
+
+    def __print_accumulated_reward_plot(self):
+        average_x = [50]
+        average_y = []
+        sum = 0
+        for i in range(0, 50):
+            sum += self.reward_count_all[i]
+        average_y.append(sum/50)
+        for i in range(50, len(self.reward_count_all)):
+            sum = sum + self.reward_count_all[i] - self.reward_count_all[i - 50]
+            average_x.append(i)
+            average_y.append(sum/50)
+        plt.title('Accumulated Reward Curve')  # 图片标题
+        plt.xlabel('Round')  # x轴变量名称
+        plt.ylabel('Accumulated Reward')  # y轴变量名称
+        plt.plot(self.reward_count_all, label="$Accumulated Reward$")  # 逐点画出reward值并连线，连线图标是Accumulated Reward
+        plt.plot(average_x, average_y, label="$Average Accumulated Reward$")  # 逐点画出reward值并连线，连线图标是Accumulated Reward
+        plt.legend()  # 画出曲线图标
+        plt.savefig("../../model/rpg/" + self.save_path + '/Accumulated Reward Curve.png')
+        plt.show()  # 画出图像

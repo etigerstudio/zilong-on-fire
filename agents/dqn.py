@@ -237,7 +237,7 @@ class DeepQNet(Model):
             else:
                 raise NotImplementedError
 
-    def print_loss_plot(self):
+    def print_loss_plot(self, save_path):
         # 计算滑动平均, 取前50组的平均值
         average_x = [50]
         average_y = []
@@ -256,4 +256,6 @@ class DeepQNet(Model):
         plt.plot(self.train_loss_results, label="$Loss$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
         plt.plot(average_x, average_y, label="$Average Loss$")  # 逐点画出average_loss值并连线，连线图标是Average Loss
         plt.legend()  # 画出曲线图标
+        plt.savefig("../../model/rpg/" + save_path + '/Loss Function Curve.png')
+        # plt.savefig('./Loss Function Curve.png')
         plt.show()  # 画出图像
