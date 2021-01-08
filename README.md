@@ -49,6 +49,32 @@
   - [ ] 重点具体语句
     - [ ] 1期
 
+## 21.1.8
+
+### 网络
+
+- [ ] 训练完后自动保存模型
+- [ ] 训练完后自动保存数据指标贴图
+- [ ] TCNN
+  - [ ] 网络状态加一个t
+  - [ ] 衰减指数有幂次
+- [ ] 4x4以上的关卡
+- [ ] SlashSpike环境剩余的参数测一下
+
+### 环境
+
+- [ ] 新的大一点的环境
+
+- [ ] 箭，要不要做
+- [ ] 跑酷环境，要不要做
+
+### 渲染器
+
+- [ ] ZeroMQ Unity和Python连接 `ZMQCommunicator`
+- [ ] 每次通过脚本生成环境 `RPGBuilder.cs`
+- [ ] 角色动画 `ActorAnimationController.cs ?`
+- [ ] 角色移动（人肉/Python控制） `ActorMovementController.cs`
+
 ## 项目组织结构
 
 ### env
