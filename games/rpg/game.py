@@ -87,7 +87,7 @@ class RPGGame:
                     if self.env.world.status == World.Status.WON:
                         rounds_won += 1
                         # 若连续生存步数超过阈值则停止训练
-                        if rounds_won >= self.complete_threshold or self.current_rounds > 2000:
+                        if rounds_won >= self.complete_threshold:
                             self.training_complete = True
                             print(f'DQN is frozen! round:{self.current_rounds} timestep:{self.current_timestep}\n')
                             self.save_path = str(datetime.datetime.now().timestamp())

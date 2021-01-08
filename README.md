@@ -53,8 +53,8 @@
 
 ### 网络
 
-- [ ] 训练完后自动保存模型
-- [ ] 训练完后自动保存数据指标贴图
+- [x] 训练完后自动保存模型
+- [x] 训练完后自动保存数据指标贴图
 - [ ] TCNN
   - [ ] 网络状态加一个t
   - [ ] 衰减指数有幂次
@@ -70,10 +70,13 @@
 
 ### 渲染器
 
-- [ ] ZeroMQ Unity和Python连接 `ZMQCommunicator`
-- [ ] 每次通过脚本生成环境 `RPGBuilder.cs`
-- [ ] 角色动画 `ActorAnimationController.cs ?`
-- [ ] 角色移动（人肉/Python控制） `ActorMovementController.cs`
+- [ ] ~~ZeroMQ Unity和Python连接 `ZMQCommunicator`~~
+- [x] 每次通过脚本生成环境 `RPGBuilder.cs`
+- [x] 角色动画 `ActorAnimationController.cs ?`
+- [x] 角色移动（人肉/Python控制） `ActorMovementController.cs`
+- [ ] 死
+- [ ] 动画骨骼
+- [ ] 宝箱/开锁
 
 ## 项目组织结构
 
