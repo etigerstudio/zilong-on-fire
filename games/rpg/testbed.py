@@ -30,6 +30,7 @@ if __name__ == "__main__":
                      eps_minimum=0.15,
                      eps_decay_steps=15000,
                      train_freq=4,
+                     use_double=True,
                      target_update_freq=100,
                      buffer_size=2000,
                      learning_rate=0.001,

@@ -21,6 +21,7 @@ class DeepQNet(Model):
                  eps_decay=1.0,
                  reward_decay=0.9,
                  optimizer=tf.optimizers.Adam,
+                 use_double=True,
                  learning_rate=0.001,
                  train_freq=4,
                  target_update_freq=50,
@@ -66,6 +67,7 @@ class DeepQNet(Model):
         self.eps_decay = eps_decay
         self.reward_decay = reward_decay
         self.optimizer = optimizer(lr=learning_rate)
+        self.use_double = use_double
         self.exploration_enabled = True
         self.network_train_times = 0
         self.sample_learn_times = 0
@@ -120,7 +122,12 @@ class DeepQNet(Model):
                 self.target_net.set_weights(self.train_net.get_weights())
             b_s, b_a, b_r, b_s_, b_d = self.__sample_from_buffer()
 
-            R_next = tf.expand_dims(tf.reduce_max(self.target_net(self.__preprocess_state(b_s_)), axis=1), 1)
+            if self.use_double:
+                actions = tf.expand_dims(tf.argmax(self.train_net(self.__preprocess_state(b_s_)), axis=1), 1)
+                R_next = tf.expand_dims(
+                    tf.gather_nd(self.target_net(self.__preprocess_state(b_s_)), actions, batch_dims=1), 1)
+            else:
+                R_next = tf.expand_dims(tf.reduce_max(self.target_net(self.__preprocess_state(b_s_)), axis=1), 1)
             R_truth = b_r + (1 - b_d) * self.gamma_discount * R_next  # b_d == 1 when in terminal state
 
             with tf.GradientTape() as tape:
