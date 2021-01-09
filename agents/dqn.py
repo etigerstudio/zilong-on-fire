@@ -22,6 +22,7 @@ class DeepQNet(Model):
                  reward_decay=0.9,
                  optimizer=tf.optimizers.Adam,
                  use_double=True,
+                 use_tcnn=True,
                  learning_rate=0.001,
                  train_freq=4,
                  target_update_freq=50,
@@ -57,8 +58,6 @@ class DeepQNet(Model):
         self.state_one_hot_len = np.sum(state_shape)
         self.state_format = state_format
         self.actions = actions
-        self.train_net = net(len(actions))
-        self.target_net = net(len(actions))
         self.eps_initial = eps_initial
         self.eps_minimum = eps_minimum
         self.eps_greedy = self.eps_initial
@@ -68,6 +67,7 @@ class DeepQNet(Model):
         self.reward_decay = reward_decay
         self.optimizer = optimizer(lr=learning_rate)
         self.use_double = use_double
+        self.use_tcnn = use_tcnn
         self.exploration_enabled = True
         self.network_train_times = 0
         self.sample_learn_times = 0
@@ -78,6 +78,8 @@ class DeepQNet(Model):
         self.batch_size = batch_size
         self.gamma_discount = gamma_discount
         self.use_one_hot = use_one_hot
+        self.train_net = net(len(actions))
+        self.target_net = net(len(actions))
         self.__init_net_weights()
         self.loss_history = []
         self.train_loss_results = []
@@ -92,7 +94,6 @@ class DeepQNet(Model):
             action：选择的动作
 
         """
-        # print(state, np.shape(state))
         if self.exploration_enabled and random.random() < self.eps_greedy:
             return random.choice(self.actions)
         else:
@@ -158,8 +159,12 @@ class DeepQNet(Model):
                 self.train_net(tf.zeros((1, self.state_len)))
                 self.target_net(tf.zeros((1, self.state_len)))
         elif self.state_format == StateFormat.MATRIX:
-            self.train_net.build((1, *self.state_shape, 1))
-            self.target_net.build((1, *self.state_shape, 1))
+            if self.use_tcnn:
+                self.train_net((tf.zeros((1, *self.state_shape, 1)), tf.ones((1, 2, 1))))
+                self.target_net((tf.zeros((1, *self.state_shape, 1)), tf.ones((1, 2, 1))))
+            else:
+                self.train_net.build((1, *self.state_shape, 1))
+                self.target_net.build((1, *self.state_shape, 1))
         else:
             raise NotImplementedError
 
@@ -169,11 +174,19 @@ class DeepQNet(Model):
         if self.state_format == StateFormat.VECTOR:
             return np.reshape(state, (1, self.state_len))
         elif self.state_format == StateFormat.MATRIX:
-            return np.reshape(state, (1, *self.state_shape, 1))
+            if self.use_tcnn:
+                matrix, t = state
+                return (np.reshape(matrix, (1, *self.state_shape, 1)),
+                        np.reshape(t, (1, 2, 1)))
+            else:
+                return np.reshape(state, (1, *self.state_shape, 1))
         else:
             raise NotImplementedError
 
     def __preprocess_state(self, state):
+        if self.use_tcnn:
+            return state
+
         return tf.constant(tf.reshape(tf.one_hot(state, 4), [-1, self.state_one_hot_len]), dtype=tf.float32) \
             if self.use_one_hot else tf.constant(state, dtype=tf.float32)
 
@@ -196,21 +209,40 @@ class DeepQNet(Model):
         elif self.state_format == StateFormat.MATRIX:
             random_buffer = random.sample(self.buffer, self.batch_size)
             b_s, b_a, b_r, b_s_, b_d = [], [], [], [], []
+            if self.use_tcnn:
+                b_st, b_s_t = [], []
             for s, a, r, s_, d in random_buffer:
-                b_s.append(s)
+                if self.use_tcnn:
+                    s, t = s
+                    b_s.append(s)
+                    b_st.append([*t])
+                    s_, t_ = s_
+                    b_s_.append(s)
+                    b_s_t.append([*t_])
+                else:
+                    b_s.append(s)
+                    b_s_.append(s_)
                 b_a.append(a)
                 b_r.append(r)
-                b_s_.append(s_)
                 b_d.append(d)
-            b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
+            if self.use_tcnn:
+                b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
+                b_st = tf.cast(tf.expand_dims(b_st, -1), dtype=tf.float32)
+                b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
+                b_s_t = tf.cast(tf.expand_dims(b_s_t, -1), dtype=tf.float32)
+            else:
+                b_s = tf.cast(tf.expand_dims(b_s, -1), dtype=tf.float32)
+                b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
             b_a = tf.cast(tf.expand_dims(b_a, -1), dtype=tf.int32)
             b_r = tf.cast(tf.expand_dims(b_r, -1), dtype=tf.float32)
-            b_s_ = tf.cast(tf.expand_dims(b_s_, -1), dtype=tf.float32)
             b_d = tf.cast(tf.expand_dims(b_d, -1), dtype=tf.float32)
         else:
             raise NotImplementedError
 
-        return b_s, b_a, b_r, b_s_, b_d
+        if self.use_tcnn:
+            return (b_s, b_st), b_a, b_r, (b_s_, b_s_t), b_d
+        else:
+            return b_s, b_a, b_r, b_s_, b_d
 
     def __save_to_buffer(self, old_state, action, reward, new_state, game_over=None):
         if self.state_format == StateFormat.VECTOR:

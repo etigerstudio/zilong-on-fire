@@ -4,7 +4,7 @@ from envs.rpg.entity import Entity
 class Barrier(Entity):
     REPRESENTATION = 2
     BARRIER_REWARD = -1
-    DESTROY_REWARD = 0.125
+    DESTROY_REWARD = 0.25
 
     def start(self, world):
         pass

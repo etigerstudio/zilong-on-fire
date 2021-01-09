@@ -11,7 +11,8 @@ class RPGGame:
                  max_rounds=100000,
                  test_interval=2000,
                  complete_threshold=25,
-                 should_render_training=True):
+                 should_render_training=True,
+                 return_t_when_step=True):
         """
 
         Args:
@@ -36,6 +37,7 @@ class RPGGame:
         self.complete_threshold = complete_threshold
         self.training_complete = False
         self.should_render_training = should_render_training
+        self.return_t_when_step = return_t_when_step
         self.survival_time_all = []
         self.reward_count = 0
         self.reward_count_all = []
@@ -50,9 +52,10 @@ class RPGGame:
             while True:
                 action = self.agent.choose_action(state)
                 new_state, reward, game_over = self.env.step(action)
-                if not self.training_complete:
-                    self.agent.learn(state, action, reward, new_state, game_over)
-                self.__render_round_step(new_state, (action, reward))
+                if self.env.world.status != self.env.world.Status.DEFEATED_MAX_TIMESTEP_EXPIRED:
+                    if not self.training_complete:
+                        self.agent.learn(state, action, reward, new_state, game_over)
+                    self.__render_round_step(new_state, (action, reward))
                 self.reward_count += reward
 
                 if not game_over:

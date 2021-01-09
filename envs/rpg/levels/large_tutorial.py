@@ -14,12 +14,15 @@ class LargeTutorial(Level):
             *Level.make_entities(1, 2, 5, 3, Spike),
             Spike([2, 0]),
             Spike([2, 1]),
+            Spike([0, 0]),
             Barrier([4, 0]),
             Barrier([4, 1]),
             Barrier([0, 2]),
             Barrier([0, 3]),
             Spike([3, 5]),
+            Spike([1, 4]),
             Barrier([3, 4]),
+            Barrier([1, 5]),
             Barrier([5, 4]),
             Treasure([5, 5])
         ]

@@ -9,6 +9,7 @@ from renderers.rpg.text import TextRPGRenderer
 from agents.dqn import DeepQNet
 from agents.nets.cnn import CNNNet
 from agents.nets.cnn2 import CNN2Net
+from agents.nets.tcnn import TCNNNet
 from games.rpg.game import RPGGame
 
 import numpy as np
@@ -21,7 +22,7 @@ tf.random.set_seed(1)
 
 if __name__ == "__main__":
     # 初始化环境、智能体、渲染器、游戏控制器
-    env = RPGEnvironment(SlashSpike)
+    env = RPGEnvironment(SlashSpike, return_t_in_states=False)
     agent = DeepQNet(env.get_state_shape(),
                      RPGEnvironment.ACTIONS,
                      CNN2Net,
@@ -30,7 +31,8 @@ if __name__ == "__main__":
                      eps_minimum=0.15,
                      eps_decay_steps=15000,
                      train_freq=4,
-                     use_double=True,
+                     use_double=False,
+                     use_tcnn=False,
                      target_update_freq=100,
                      buffer_size=2000,
                      learning_rate=0.001,
@@ -39,7 +41,7 @@ if __name__ == "__main__":
     game = RPGGame(env,
                    agent,
                    renderer,
-                   max_rounds=100000,
+                   max_rounds=200000,
                    test_interval=200,
                    should_render_training=False)
     game.begin()

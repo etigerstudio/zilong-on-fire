@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class TCNNNet(Model):
-    def __init__(self, output_dim=3):
+    def __init__(self, output_dim):
         """
 
         Args:
@@ -12,29 +12,16 @@ class TCNNNet(Model):
         """
         super(TCNNNet, self).__init__()
         self.c1 = Conv2D(filters=16, kernel_size=(4, 4), strides=2, activation='relu')  # 卷积层
-        self.c2 = Conv2D(filters=32, kernel_size=(3, 3), strides=1, activation='relu')  # 卷积层
+        self.c2 = Conv2D(filters=32, kernel_size=(2, 2), strides=1, activation='relu')  # 卷积层
         self.flatten = Flatten()
         self.d1 = Dense(64, activation='relu')
-        self.d3 = Dense(output_dim)
-        self.t = 0
-        self.t_max = None
+        self.d2 = Dense(output_dim)
 
     def call(self, x):
         x, t = x
         x = self.c1(x)
-        # x = self.c2(x)
-        x = tf.concat([self.flatten(x), tf.reshape(tf.cast(t / self.t_max, dtype=tf.float32), (1, 1))], axis=1)
+        x = self.c2(x)
+        x = tf.concat([self.flatten(x), tf.reshape(tf.cast(t[:, 0] / t[:, 1], dtype=tf.float32), (-1, 1))], axis=1)
         x = self.d1(x)
-        x = self.d2(x)
-        y = self.d3(x)
+        y = self.d2(x)
         return y
-
-    def model(self):
-        x = Input(shape=(6, 6, 1))
-        return Model(inputs=[x], outputs=self.call(x))
-
-    def init_t(self, t_max):
-        self.t_max = t_max
-
-    def set_t(self, t):
-        self.t = t

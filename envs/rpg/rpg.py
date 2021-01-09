@@ -64,16 +64,28 @@ class RPGEnvironment(BaseEnvironment):
         # Action.CROUCH: (Actor.Movement.CROUCH, Actor.Spell.IDLE)
     }
 
-    def __init__(self, level):
+    def __init__(self,
+                 level,
+                 return_t_in_states=True,):
         self.world = World(level)
+        self.return_t_in_states = return_t_in_states
 
     def step(self, action):
         game_over, reward = self.world.step(*RPGEnvironment.__ACTION_MAPPINGS[action])
-        return np.array(self.world.get_matrix_representation()), reward, game_over
+        if self.return_t_in_states:
+            return (np.array(self.world.get_matrix_representation()),
+                    (self.world.time_elapsed, self.world.time_limit)), \
+                   reward, game_over
+        else:
+            return np.array(self.world.get_matrix_representation()), \
+                   reward, game_over
 
     def reset(self):
         self.world.reset()
-        return np.array(self.world.get_matrix_representation())
+        if self.return_t_in_states:
+            return np.array(self.world.get_matrix_representation()), (self.world.time_elapsed, self.world.time_limit)
+        else:
+            return np.array(self.world.get_matrix_representation())
 
     def get_state_shape(self):
         return self.world.level_width + self.STATE_PADDING * 2,\
