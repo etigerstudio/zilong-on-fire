@@ -12,7 +12,7 @@ class RPGGame:
                  test_interval=2000,
                  complete_threshold=25,
                  should_render_training=True,
-                 return_t_when_step=True):
+                 return_t_when_step=False):
         """
 
         Args:

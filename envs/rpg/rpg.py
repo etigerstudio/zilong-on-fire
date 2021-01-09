@@ -66,7 +66,7 @@ class RPGEnvironment(BaseEnvironment):
 
     def __init__(self,
                  level,
-                 return_t_in_states=True,):
+                 return_t_in_states=False,):
         self.world = World(level)
         self.return_t_in_states = return_t_in_states
 
