@@ -63,6 +63,7 @@ if __name__ == "__main__":
     entities = env.world.entities
     width = env.world.level_width
     height = env.world.level_height
+    entities_list = generate_entities_list(entities)
     print(adjust_matrix(state))
     model = tf.keras.models.load_model('../../model/rpg/' + model_save_path)
     actions_history = []
@@ -80,7 +81,6 @@ if __name__ == "__main__":
     print(f'Game is over, reason: {env.world.status}')
     print('action history: ', actions_history)
 
-    entities_list = generate_entities_list(entities)
     actions_list = generate_actions_list(actions_history)
     save_data = {"level": {"width": width, "height": height, "entities": entities_list},
                  "action": actions_list}
