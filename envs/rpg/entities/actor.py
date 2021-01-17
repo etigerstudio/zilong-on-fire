@@ -4,7 +4,7 @@ from enum import Enum
 
 class Actor(Entity):
     REPRESENTATION = 4
-    VAIN_SLASH_REWARD = 0
+    VAIN_SLASH_REWARD = -0.125
 
     class Pose(Enum):
         STANDING = 0

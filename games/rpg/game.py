@@ -52,10 +52,9 @@ class RPGGame:
             while True:
                 action = self.agent.choose_action(state)
                 new_state, reward, game_over = self.env.step(action)
-                if self.env.world.status != self.env.world.Status.DEFEATED_MAX_TIMESTEP_EXPIRED:
-                    if not self.training_complete:
-                        self.agent.learn(state, action, reward, new_state, game_over)
-                    self.__render_round_step(new_state, (action, reward))
+                if not self.training_complete:
+                    self.agent.learn(state, action, reward, new_state, game_over)
+                self.__render_round_step(new_state, (action, reward))
                 self.reward_count += reward
 
                 if not game_over:
@@ -94,7 +93,7 @@ class RPGGame:
                             self.training_complete = True
                             print(f'DQN is frozen! round:{self.current_rounds} timestep:{self.current_timestep}\n')
                             self.save_path = str(datetime.datetime.now().timestamp())
-                            self.agent.target_net.save("../../model/rpg/" + self.save_path)
+                            self.agent.train_net.save("../../models/rpg/" + self.save_path)
                             self.agent.print_loss_plot(self.save_path)
                             self.__print_survival_time_plot()
                             self.__print_accumulated_reward_plot()
