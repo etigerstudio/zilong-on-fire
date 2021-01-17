@@ -1,4 +1,8 @@
-# 十面埋伏 Zilong on Fire
+![hero](docs/images/hero.png)
+
+> In collaboration with: 协作成员： @MarshaZheng @FarmerLiuAng
+
+Related 3D renderer: 相关3D渲染器：[Zilong on Fire Unity 3D Renderer](https://github.com/etigerstudio/zilong-on-fire-renderer)
 
 ## 蓝图
 
